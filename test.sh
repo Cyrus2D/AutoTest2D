@@ -123,7 +123,7 @@ match() {
 	OPTIONS="$OPTIONS -server::nr_normal_halfs=2 -server::nr_extra_halfs=0"
 	OPTIONS="$OPTIONS -server::penalty_shoot_outs=false -server::auto_mode=on"
 	OPTIONS="$OPTIONS -server::game_logging=$GAME_LOGGING -server::text_logging=$TEXT_LOGGING"
-	OPTIONS="$OPTIONS -server::game_log_compression=1 -server::text_log_compression=1"
+	OPTIONS="$OPTIONS -server::game_log_compression=0 -server::text_log_compression=0"
 	OPTIONS="$OPTIONS -server::game_log_fixed=1 -server::text_log_fixed=1"
 	OPTIONS="$OPTIONS -server::synch_mode=$SYNCH_MODE"
 	OPTIONS="$OPTIONS -server::fullstate_l=$FULLSTATE_L -server::fullstate_r=$FULLSTATE_R"
