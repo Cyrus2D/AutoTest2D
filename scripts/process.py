@@ -26,7 +26,7 @@ class Context:
 
     def dump(self, method):
         for line in self.lines:
-            print method(line)
+            print(method(line))
 
 #dump methods
 def console(line):
@@ -228,7 +228,7 @@ class GameData:
             self.win_rate = self.win_count / game_count
             self.compute_confidence_interval()
 
-            print self.count, self.win_rate, self.confidence_intervel_left, self.confidence_intervel_right
+            print(self.count, self.win_rate, self.confidence_intervel_left, self.confidence_intervel_right)
 
     def gen_score_distri(self, score_distri):
         def bar(percentage):
@@ -402,7 +402,7 @@ class GameData:
         self.context.dump(method)
 
     def gen_score_map(self):
-        print "# (%d, %d) * (%d, %d)" % (self.left_min_score, self.left_max_score, self.right_min_score, self.right_max_score)
+        print ("# (%d, %d) * (%d, %d)" % (self.left_min_score, self.left_max_score, self.right_min_score, self.right_max_score))
 
         for i in range(self.left_min_score, self.left_max_score + 1):
             for j in range(self.right_min_score, self.right_max_score + 1):
@@ -411,9 +411,9 @@ class GameData:
                 if self.score_map.has_key(i) and self.score_map[i].has_key(j):
                     share = self.score_map[i][j] / float(self.count)
 
-                print i, j, share
+                print (i, j, share)
 
-            print
+            print()
 
 
 usage = "Usage: %prog [options]"
@@ -437,7 +437,7 @@ for line in sys.stdin:
         lines.append(line)
 
 if len(lines) <= 1: #at least two lines: title + result
-    print "No results found, exit"
+    print ("No results found, exit")
     sys.exit(1)
 
 game_data = GameData(not options.simplify, options.curve, options.map)
@@ -445,29 +445,29 @@ game_data = GameData(not options.simplify, options.curve, options.map)
 if options.discuz:
     game_data.run(lines, discuz)
 elif options.html:
-    print """
+    print ("""
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta http-equiv="refresh" content="60">
 <title>Test Results</title>
 </head>
 <body>
-"""
+""")
     if options.temp:
-        print "<h1>Test Results<font color=Red> (Can be killed any time!)</font></h1>"
+        print ("<h1>Test Results<font color=Red> (Can be killed any time!)</font></h1>")
     else:
-        print "<h1>Test Results</h1>"
-    print """
+        print ("<h1>Test Results</h1>")
+    print ("""
 <hr>
 <img src="curve.png" alt="Winning Rate" style="width:640px;height:400px;">
 <img src="map.png" alt="Score Map" style="width:640px;height:400px;">
 <hr>
 <p>
-"""
+""")
     game_data.run(lines, html)
-    print """
+    print ("""
 </body>
-"""
+""")
 elif options.no_color:
     game_data.run(lines, no_color)
 else:
