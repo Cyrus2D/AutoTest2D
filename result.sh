@@ -1,5 +1,4 @@
 #!/bin/bash
-
 RESULT_DIR="result.d"
 PARSE="../scripts/parse.awk"
 PROCESS="../scripts/process.py"
@@ -56,7 +55,7 @@ parseall() {
     cat $CACHE_FILE
 }
 
-parseall | python $PROCESS $* >>$RESULT
+parseall | python2.7 $PROCESS $* >>$RESULT
 
 if [ $SPINNER_PID -gt 0 ]; then
     exec 2>/dev/null
