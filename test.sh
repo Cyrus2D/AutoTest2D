@@ -118,8 +118,8 @@ match() {
       local RIGHT_RESULT="${PWD}/${RESULT_DIR}/${TIME}_R"
 		  if [ ! -f "$RESULT" ]; then
         local FULL_OPTIONS=""
-        FULL_OPTIONS="$OPTIONS -server::team_r_start=\"./start_team $HOST $PORT $OLCOACH_PORT $RIGHT_TEAM $LEFT_RESULT\""
-        FULL_OPTIONS="$FULL_OPTIONS -server::team_l_start=\"./start_team $HOST $PORT $OLCOACH_PORT $LEFT_TEAM $RIGHT_RESULT\""
+        FULL_OPTIONS="$OPTIONS -server::team_r_start=\"./start_team $HOST $PORT $OLCOACH_PORT $RIGHT_TEAM $RIGHT_RESULT\""
+        FULL_OPTIONS="$FULL_OPTIONS -server::team_l_start=\"./start_team $HOST $PORT $OLCOACH_PORT $LEFT_TEAM $LEFT_RESULT\""
         FULL_OPTIONS="$FULL_OPTIONS -server::game_log_dir=\"./$LOG_DIR/\" -server::text_log_dir=\"./$LOG_DIR/\""
         FULL_OPTIONS="$FULL_OPTIONS -server::game_log_fixed_name=\"$TIME\" -server::text_log_fixed_name=\"$TIME\""
         run_server $FULL_OPTIONS  &>$RESULT
