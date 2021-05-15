@@ -1,84 +1,73 @@
 #!/bin/bash
 
-PROCES=5              #number of simultaneously running servers
-
-#CLIENTS=(
-#    "192.168.26.102"
-#    "192.168.26.103"
-#    "192.168.26.104"
-#    "192.168.26.110"
-#    "192.168.26.120"
-#    "192.168.26.102"
-#    "192.168.26.103"
-#    "192.168.26.110"
-#    "192.168.26.120"
-#    "192.168.26.102"
-#    "192.168.26.103"
-#)  #IPs of machines running clients，CLIENTS=("localhost") for testing on localhost，has to be configured as password-less login for SSH
-
-CLIENTS=("localhost")
-
-#CLIENTS=("192.168.26.102" "192.168.26.103")
-
-ROUNDS=100           #number of games for each server
-DEFAULT_PORT=$3      #default port connecting to server
-CONTINUE="false"       #continue from last test
+THREAD=5              #number of simultaneously running servers
+ROUNDS=20           #number of games for each server
 GAME_LOGGING="true"   #record RCG logs
 TEXT_LOGGING="false"   #record RCL logs
-MSG_LOGGING="false"    #record MSG logs for WrightEagle
-TEMP="false"           #can be killed any time?
-TRAINING="false"       #training mode
 RANDOM_SEED="-1"       #random seed, -1 means random seeding
 SYNCH_MODE="1"         #synch mode
 FULLSTATE_L="0"        #full state mode for left
 FULLSTATE_R="0"        #full state mode for right
+LEFT_TEAM=
+RIGHT_TEAM=
+DEFAULT_PORT=      #default port connecting to server
 
-############# do not need to change following parameters
-RESTART_AS_TEMP="false"
-IN_WRAPPER="false"
-TEMP_MARKER="/tmp/autotest::temp"
+printHelp(){
+  echo ./test -l LEFT_TEAM -r RIGHT_TEAM -p DEFAULT_PORT [-t THREAD] [-ro ROUNDS]
+}
 
-while getopts  "r:p:ctkio" flag; do
-    case "$flag" in
-        r) ROUNDS=$OPTARG;;
-        p) PROCES=$OPTARG;;
-        c) CONTINUE="true";;
-        t) TEMP="true";;
-        o) TRAINING="true";;
-        k) RESTART_AS_TEMP="true";;
-        i) IN_WRAPPER="true";;
-    esac
+while [[ $# -gt 0 ]]
+do
+key="$1"
+case $key in
+    -t|--thread)
+    THREAD="$2"
+    shift 2
+    ;;
+    -ro|--round)
+    ROUNDS="$2"
+    shift 2
+    ;;
+    -p|--port)
+    DEFAULT_PORT="$2"
+    echo HHHHHHHHHH
+    shift 2
+    ;;
+    -l|--left)
+    LEFT_TEAM="$2"
+    shift 2
+    ;;
+    -r|--right)
+    RIGHT_TEAM="$2"
+    shift 2
+    ;;
+    -h)
+    printHelp
+    exit 0
+    ;;
+    *)    # unknown option
+    echo "$1" is not valid
+    printHelp
+    exit 1
+    ;;
+esac
 done
 
-###############
-if [ $RESTART_AS_TEMP = "true" ]; then
-    if [ $IN_WRAPPER = "true" ]; then
-        sleep 0.5
-        ./test.sh -ct
-        rm -f $0
-        exit
-    fi
-
-    WRAPPER=`mktemp`
-    cp $0 $WRAPPER
-    chmod +x $WRAPPER
-    $WRAPPER -ik &
-    ./kill.sh
-    exit
+success=1
+[ -n "$DEFAULT_PORT" ] || success=0
+[ -n "$LEFT_TEAM" ] || success=0
+[ -n "$RIGHT_TEAM" ] || success=0
+if ((!success)); then
+  printHelp
+  exit 1
 fi
 
-echo "\$PROCES = $PROCES"
+echo "\$THREAD = $THREAD"
 echo "\$ROUNDS = $ROUNDS"
-echo "\$CONTINUE = $CONTINUE"
-echo "\$TEMP = $TEMP"
-echo "\$TRAINING = $TRAINING"
 echo "\$RANDOM_SEED = $RANDOM_SEED"
-
-rm -f $TEMP_MARKER
-if [ $TEMP = "true" ]; then
-    touch $TEMP_MARKER
-    chmod 777 $TEMP_MARKER
-fi
+echo "\$DEFAULT_PORT = $DEFAULT_PORT"
+echo "\$LEFT_TEAM = $LEFT_TEAM"
+echo "\$RIGHT_TEAM = $RIGHT_TEAM"
 
 RESULT_DIR="result.d"
 LOG_DIR="log.d"
@@ -88,10 +77,9 @@ HTML="$RESULT_DIR/index.html"
 HTML_GENERATING_LOCK="/tmp/autotest_html_generating"
 
 run_server() {
-    echo "ali"
     ulimit -t 300
-    echo rcssserver $*
-    rcssserver $*
+    echo rcssserver "$@"
+    rcssserver "$@"
 }
 
 server_count() {
@@ -99,62 +87,46 @@ server_count() {
 }
 
 match() {
-    local HOST=$1
-	local PORT=$2
-
-	local OPTIONS=""
-
-    local COACH_PORT=`expr $PORT + 1`
-    local OLCOACH_PORT=`expr $PORT + 2`
-
-    local a=`expr $PORT / 1000`
-    local b=`expr $a + 1`
-
-    a=`expr $a % ${#CLIENTS[@]}`
-    b=`expr $b % ${#CLIENTS[@]}`
-
-    local LEFT_CLIENT=${CLIENTS[$a]}
-    local RIGHT_CLIENT=${CLIENTS[$b]}
+	  local PORT=$1
+	  local HOST="127.0.0.1"
+	  local OPTIONS=""
+    local COACH_PORT=$((PORT+1))
+    local OLCOACH_PORT=$((PORT+2))
 
     OPTIONS="$OPTIONS -server::port=$PORT"
     OPTIONS="$OPTIONS -server::coach_port=$COACH_PORT"
     OPTIONS="$OPTIONS -server::olcoach_port=$OLCOACH_PORT"
     OPTIONS="$OPTIONS -player::random_seed=$RANDOM_SEED"
-	OPTIONS="$OPTIONS -server::nr_normal_halfs=2 -server::nr_extra_halfs=0"
-	OPTIONS="$OPTIONS -server::penalty_shoot_outs=false -server::auto_mode=on"
-	OPTIONS="$OPTIONS -server::game_logging=$GAME_LOGGING -server::text_logging=$TEXT_LOGGING"
-	OPTIONS="$OPTIONS -server::game_log_compression=0 -server::text_log_compression=0"
-	OPTIONS="$OPTIONS -server::game_log_fixed=1 -server::text_log_fixed=1"
-	OPTIONS="$OPTIONS -server::synch_mode=$SYNCH_MODE"
-	OPTIONS="$OPTIONS -server::fullstate_l=$FULLSTATE_L -server::fullstate_r=$FULLSTATE_R"
-    OPTIONS="$OPTIONS -server::team_r_start=\"./start_right $HOST $PORT $OLCOACH_PORT $3\""
-
-    if [ $TRAINING = "true" ]; then
-        OPTIONS="$OPTIONS -server::coach=true -server::coach_w_referee=true"
-    fi
+    OPTIONS="$OPTIONS -server::nr_normal_halfs=2 -server::nr_extra_halfs=0"
+    OPTIONS="$OPTIONS -server::penalty_shoot_outs=false -server::auto_mode=on"
+    OPTIONS="$OPTIONS -server::game_logging=$GAME_LOGGING -server::text_logging=$TEXT_LOGGING"
+    OPTIONS="$OPTIONS -server::game_log_compression=0 -server::text_log_compression=0"
+    OPTIONS="$OPTIONS -server::game_log_fixed=1 -server::text_log_fixed=1"
+    OPTIONS="$OPTIONS -server::synch_mode=$SYNCH_MODE"
+    OPTIONS="$OPTIONS -server::fullstate_l=$FULLSTATE_L -server::fullstate_r=$FULLSTATE_R"
 
     rm -f $HTML_GENERATING_LOCK
     generate_html
 
-	for i in `seq 1 $ROUNDS`; do
-        local TIME="`date +%Y%m%d%H%M`_$RANDOM"
-        local RESULT="$RESULT_DIR/$TIME"
-
-		if [ ! -f $RESULT ]; then
-            local MSG_LOG_DIR="Logfiles_$TIME"
-            local FULL_OPTIONS=""
-
-            FULL_OPTIONS="$OPTIONS -server::game_log_dir=\"./$LOG_DIR/\" -server::text_log_dir=\"./$LOG_DIR/\""
-            FULL_OPTIONS="$FULL_OPTIONS -server::game_log_fixed_name=\"$TIME\" -server::text_log_fixed_name=\"$TIME\""
-
-            
-            FULL_OPTIONS="$FULL_OPTIONS -server::team_l_start=\"./start_left $HOST $PORT $OLCOACH_PORT $4\""
-            run_server $FULL_OPTIONS  &>$RESULT
-		fi
-
-        sleep 1
-        generate_html
-	done
+	  for i in $(seq 1 "$ROUNDS"); do
+	    local TIME
+	    local PWD
+      TIME="$(date +%Y%m%d%H%M)_$RANDOM"
+      local RESULT="$RESULT_DIR/$TIME"
+      PWD="$(pwd)"
+      local LEFT_RESULT="${PWD}/${RESULT_DIR}/${TIME}_L"
+      local RIGHT_RESULT="${PWD}/${RESULT_DIR}/${TIME}_R"
+		  if [ ! -f "$RESULT" ]; then
+        local FULL_OPTIONS=""
+        FULL_OPTIONS="$OPTIONS -server::team_r_start=\"./start_team $HOST $PORT $OLCOACH_PORT $RIGHT_TEAM $LEFT_RESULT\""
+        FULL_OPTIONS="$FULL_OPTIONS -server::team_l_start=\"./start_team $HOST $PORT $OLCOACH_PORT $LEFT_TEAM $RIGHT_RESULT\""
+        FULL_OPTIONS="$FULL_OPTIONS -server::game_log_dir=\"./$LOG_DIR/\" -server::text_log_dir=\"./$LOG_DIR/\""
+        FULL_OPTIONS="$FULL_OPTIONS -server::game_log_fixed_name=\"$TIME\" -server::text_log_fixed_name=\"$TIME\""
+        run_server $FULL_OPTIONS  &>$RESULT
+  		fi
+      sleep 1
+      generate_html
+  	done
 }
 
 generate_html() {
@@ -162,63 +134,42 @@ generate_html() {
         touch $HTML $HTML_GENERATING_LOCK
         chmod 777 $HTML $HTML_GENERATING_LOCK 2>/dev/null #allow others to delete or overwrite
 
-        if [ $TEMP = "true" ]; then
-            ./result.sh -HT >$HTML
-        else
-            ./result.sh --html >$HTML
-    	fi
-
+        ./result.sh --html >$HTML
         ./analyze.sh 2>/dev/null
         echo -e "<hr>" >>$HTML
-        echo -e "<p><small>"`whoami`" @ "`date`"</small></p>" >>$HTML
+        echo -e "<p><small>""$(whoami)"" @ ""$(date)""</small></p>" >>$HTML
         rm -f $HTML_GENERATING_LOCK
     fi
 }
 
 autotest() {
-    rightteam=$2
-    leftteam=$1
-    
     export LANG="POSIX"
 
-    if [ `server_count` -gt 0 ]; then
-        echo "Error: other server running, exit"
+    if [ "$(server_count)" -gt 0 ]; then
+        echo "Warning: other server running"
         #exit
     fi
 
-    if [ $CONTINUE = "false" ]; then
-        if [ -d $RESULT_DIR ]; then
-			echo "Warning: previous test result left, backuped"
-			mv $RESULT_DIR ${RESULT_DIR}_`date +"%F_%H%M"`
-			mv $LOG_DIR ${LOG_DIR}_`date +"%F_%H%M"`
-        fi
-        mkdir $RESULT_DIR || exit
-        mkdir $LOG_DIR || exit
-        TOTAL_ROUNDS=`expr $PROCES '*' $ROUNDS`
-        echo $TOTAL_ROUNDS >$TOTAL_ROUNDS_FILE
-        echo `date` >$TIME_STAMP_FILE
-    else
-        if [ ! -d $RESULT_DIR ]; then
-			echo "Error: can not find previous test result"
-            exit
-        fi
-        PRE_TOTAL_ROUNDS=`./result.sh --no-color | awk '{print $3}' | grep '[013]:[013]' | wc -l`
-        TOTAL_ROUNDS=`expr $PROCES '*' $ROUNDS + $PRE_TOTAL_ROUNDS`
-        echo $TOTAL_ROUNDS >$TOTAL_ROUNDS_FILE
-        echo `date` >>$TIME_STAMP_FILE
+    if [ -d $RESULT_DIR ]; then
+      echo "Warning: previous test result left, backuped"
+      mv $RESULT_DIR ${RESULT_DIR}_"$(date +"%F_%H%M")"
+      mv $LOG_DIR ${LOG_DIR}_"$(date +"%F_%H%M")"
     fi
-
-    local IP_PATTERN='192\.168\.[0-9]\{1,3\}\.[0-9]\{1,3\}'
-    #local SERVER_HOSTS=(`/sbin/ifconfig | grep -o "inet addr:$IP_PATTERN" | grep -o "$IP_PATTERN"`)
-    local HOST="localhost"
+    mkdir $RESULT_DIR || exit
+    mkdir $LOG_DIR || exit
+    TOTAL_ROUNDS=$((THREAD * $ROUNDS))$
+    echo "$TOTAL_ROUNDS" >$TOTAL_ROUNDS_FILE
+    date >$TIME_STAMP_FILE
 
     local i=0
-    while [ $i -lt $PROCES ]; do
-        local PORT=`expr $DEFAULT_PORT + $i \* 100`
-        match $HOST $PORT $rightteam $leftteam&
-        i=`expr $i + 1`
+    while [ $i -lt "$THREAD" ]; do
+        local PORT
+        ADDPort=$((i * 10))
+        PORT=$((DEFAULT_PORT + ADDPort))
+        match $PORT &
+        i=$((i + 1))
         sleep 1
     done
     return 0
 }
-autotest $1 $2
+autotest

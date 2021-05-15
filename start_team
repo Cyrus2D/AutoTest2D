@@ -1,0 +1,48 @@
+#!/bin/bash
+#$HOST $PORT $OLCOACH_PORT $RIGHT_TEAM $LEFT_RESULT
+echo 'starttttttttttttttttttt'
+HOST=$1
+PORT=$2
+OLCOACH_PORT=$3
+TEAM=$4
+RESULT=$5
+echo *****STARTING $HOST $PORT $OLCOACH_PORT $OLC$TEAM $RESULT
+
+if [[ $TEAM = "cr19" ]]; then
+  cd /home/nader/workspace/robo/japan_bin/r0/CYRUS && ./auto.sh $PORT $OLCOACH_PORT &> $RESULT
+elif [[ $TEAM = "razi19" ]]; then
+  cd /home/nader/workspace/robo/bin/razi && ./auto.sh $PORT $OLCOACH_PORT &> $RESULT
+elif [[ $TEAM = "hel19" ]]; then
+  cd /home/nader/workspace/robo/bin/helios && ./auto.sh $HOST $PORT $OLCOACH_PORT &> $RESULT
+elif [[ $TEAM = "hel20" ]]; then
+  cd /home/nader/workspace/robo/bin/helios2020 && ./auto.sh $HOST $PORT $OLCOACH_PORT &> $RESULT
+elif [[ $TEAM = "rec19" ]]; then
+  cd /home/nader/workspace/robo/bin/receptivity && ./auto.sh $PORT $OLCOACH_PORT &> $RESULT
+elif [[ $TEAM = "base" ]]; then
+  cd /home/nader/workspace/robo/agent2d-3.1.1/src && ./auto.sh -p $PORT -P $OLCOACH_PORT &> $RESULT
+elif [[ $TEAM = "mt19" ]]; then
+  cd /home/nader/workspace/robo/bin/mt && ./auto.sh $PORT $OLCOACH_PORT &> $RESULT
+elif [[ $TEAM = "wr" ]]; then
+  cd /home/nader/workspace/robo/bin/wrighteagle && ./start-local.sh $PORT $OLCOACH_PORT &> $RESULT
+elif [[ $TEAM = "oxsy" ]]; then
+  cd /home/nader/Documents/bin/17/oxsy && ./auto.sh $HOST $PORT $OLCOACH_PORT &> $RESULT
+elif [[ $TEAM = "fra" ]]; then
+  cd /home/nader/drive/bin/18/fraunited && ./startAll &> $RESULT
+elif [[ $TEAM = "yush19" ]]; then
+  cd /home/nader/workspace/robo/bin/yushan && ./start.sh $PORT $OLCOACH_PORT &> $RESULT
+elif [[ $TEAM = "kn18" ]]; then
+  cd /home/nader/drive/bin/18/asia-material-KN2C/KN2C2018-Bin && ./startAll $PORT $OLCOACH_PORT &> $RESULT
+elif [[ $TEAM = "mt18" ]]; then
+  cd /home/nader/drive/bin/18/mt && ./auto.sh $HOST $PORT $OLCOACH_PORT &> $RESULT
+elif [[ $TEAM = "mt19" ]]; then
+  cd /home/nader/drive/bin/19/mt && ./auto.sh $HOST $PORT $OLCOACH_PORT &> $RESULT
+elif [[ $TEAM = "it18" ]]; then
+  cd /home/nader/drive/bin/18/itandroids && ./auto.sh $HOST $PORT $OLCOACH_PORT &> $RESULT
+elif [[ $TEAM = "ox18" ]]; then
+  cd /home/nader/drive/bin/18/oxsy && ./auto.sh $HOST $PORT $OLCOACH_PORT &> $RESULT
+elif [[ $TEAM = "cr18" ]]; then
+  cd /home/nader/drive/bin/18/cyrus_round_3/src && ./auto.sh -p $PORT -P $OLCOACH_PORT &> $RESULT
+elif [[ $TEAM = "base" ]]; then
+  cd /home/nader/workspace/robo/agent2d-3.1.1/src && ./auto.sh -p $PORT -P $OLCOACH_PORT &> $RESULT
+fi
+sleep 5
