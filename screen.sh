@@ -5,6 +5,7 @@ ROUNDS=20           #number of games for each server
 LEFT_TEAM=
 RIGHT_TEAM=
 DEFAULT_PORT=      #default port connecting to server
+SESSION_NAME=
 
 printHelp(){
   echo ./test -l LEFT_TEAM -r RIGHT_TEAM -p DEFAULT_PORT [-t THREAD] [-ro ROUNDS]
@@ -35,8 +36,8 @@ case $key in
     shift 2
     ;;
     -s|--screen)
-    USE_SCREEN=1
-    shift 1
+    SESSION_NAME="$2"
+    shift 2
     ;;
     -h)
     printHelp

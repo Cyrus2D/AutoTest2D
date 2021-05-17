@@ -12,7 +12,7 @@ LEFT_TEAM=
 RIGHT_TEAM=
 DEFAULT_PORT=      #default port connecting to server
 USE_SCREEN=0
-SCREEN_NAME=
+SESSION_NAME=
 
 printHelp(){
   echo ./test -l LEFT_TEAM -r RIGHT_TEAM -p DEFAULT_PORT [-t THREAD] [-ro ROUNDS]
@@ -44,7 +44,7 @@ case $key in
     ;;
     -s|--screen)
     USE_SCREEN=1
-    SCREEN_NAME="$2"
+    SESSION_NAME="$2"
     shift 2
     ;;
     -h)
