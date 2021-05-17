@@ -15,7 +15,8 @@ USE_SCREEN=0
 SESSION_NAME=
 
 printHelp(){
-  echo ./test -l LEFT_TEAM -r RIGHT_TEAM -p DEFAULT_PORT [-t THREAD] [-ro ROUNDS]
+  echo ./test -l LEFT_TEAM -r RIGHT_TEAM -p DEFAULT_PORT [-t THREAD] [-ro ROUNDS] [-s SESSION_NAME]
+  echo screen -S SESSION_NAME -d -m ./test -s SESSION_NAME ...
 }
 
 while [[ $# -gt 0 ]]

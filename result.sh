@@ -1,7 +1,15 @@
 #!/bin/bash
-RESULT_DIR="result.d"
+SESSION_NAME="."
+
+
 PARSE="../scripts/parse.awk"
 PROCESS="../scripts/process.py"
+if [ $# = 1 ]; then
+  SESSION_NAME=$1
+  PARSE="../../scripts/parse.awk"
+  PROCESS="../../scripts/process.py"
+fi
+RESULT_DIR="$SESSION_NAME/result.d"
 
 cd $RESULT_DIR 2>/dev/null || exit
 
