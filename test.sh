@@ -85,8 +85,8 @@ RESULT_DIR="result.d"
 LOG_DIR="log.d"
 if [ $USE_SCREEN ];
 then
-  RESULT_DIR="${SESSION_NAME}/result.d"
-  LOG_DIR="${SESSION_NAME}/log.d"
+  RESULT_DIR="out_${SESSION_NAME}/result.d"
+  LOG_DIR="out_${SESSION_NAME}/log.d"
 else
   RESULT_DIR="out/result.d"
   LOG_DIR="out/log.d"
@@ -171,14 +171,14 @@ autotest() {
         #exit
     fi
     if [ $USE_SCREEN ]; then
-      if [ -d $SESSION_NAME ]; then
+      if [ -d "out_$SESSION_NAME" ]; then
         echo "Warning: previous test result left, backuped"
-        mv $SESSION_NAME ${SESSION_NAME}_"$(date +"%F_%H%M")"
+        mv "out_${SESSION_NAME}" "out_${SESSION_NAME}_$(date +"%F_%H%M")"
       fi
     else
       if [ -d $RESULT_DIR ]; then
         echo "Warning: previous test result left, backuped"
-        mv out out_"$(date +"%F_%H%M")"
+        mv "out" "out_$(date +"%F_%H%M")"
       fi
     fi
     mkdir -p $RESULT_DIR || exit

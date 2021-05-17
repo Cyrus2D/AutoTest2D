@@ -9,7 +9,7 @@ if [ $# = 1 ]; then
   PARSE="../../scripts/parse.awk"
   PROCESS="../../scripts/process.py"
 fi
-RESULT_DIR="$SESSION_NAME/result.d"
+RESULT_DIR="out_${SESSION_NAME}/result.d"
 
 cd $RESULT_DIR 2>/dev/null || exit
 
