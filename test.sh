@@ -11,6 +11,8 @@ FULLSTATE_R="0"        #full state mode for right
 LEFT_TEAM=
 RIGHT_TEAM=
 DEFAULT_PORT=      #default port connecting to server
+USE_SCREEN=0
+SCREEN_NAME=
 
 printHelp(){
   echo ./test -l LEFT_TEAM -r RIGHT_TEAM -p DEFAULT_PORT [-t THREAD] [-ro ROUNDS]
@@ -30,7 +32,6 @@ case $key in
     ;;
     -p|--port)
     DEFAULT_PORT="$2"
-    echo HHHHHHHHHH
     shift 2
     ;;
     -l|--left)
@@ -39,6 +40,11 @@ case $key in
     ;;
     -r|--right)
     RIGHT_TEAM="$2"
+    shift 2
+    ;;
+    -s|--screen)
+    USE_SCREEN=1
+    SCREEN_NAME="$2"
     shift 2
     ;;
     -h)
@@ -173,3 +179,7 @@ autotest() {
     return 0
 }
 autotest
+if [ $USE_SCREEN ];
+then
+  wait
+fi
