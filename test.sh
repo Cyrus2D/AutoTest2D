@@ -77,6 +77,11 @@ echo "\$RIGHT_TEAM = $RIGHT_TEAM"
 
 RESULT_DIR="result.d"
 LOG_DIR="log.d"
+if [ $USE_SCREEN ];
+then
+  RESULT_DIR="${SESSION_NAME}/result.d"
+  LOG_DIR="${SESSION_NAME}/log.d"
+fi
 TOTAL_ROUNDS_FILE="$RESULT_DIR/total_rounds"
 TIME_STAMP_FILE="$RESULT_DIR/time_stamp"
 HTML="$RESULT_DIR/index.html"
@@ -136,6 +141,7 @@ match() {
 }
 
 generate_html() {
+  return 0
     if [ ! -f $HTML_GENERATING_LOCK ]; then
         touch $HTML $HTML_GENERATING_LOCK
         chmod 777 $HTML $HTML_GENERATING_LOCK 2>/dev/null #allow others to delete or overwrite
@@ -155,14 +161,20 @@ autotest() {
         echo "Warning: other server running"
         #exit
     fi
-
-    if [ -d $RESULT_DIR ]; then
-      echo "Warning: previous test result left, backuped"
-      mv $RESULT_DIR ${RESULT_DIR}_"$(date +"%F_%H%M")"
-      mv $LOG_DIR ${LOG_DIR}_"$(date +"%F_%H%M")"
+    if [ $USE_SCREEN ]; then
+      if [ -d $SESSION_NAME ]; then
+        echo "Warning: previous test result left, backuped"
+        mv $SESSION_NAME ${SESSION_NAME}_"$(date +"%F_%H%M")"
+      fi
+    else
+      if [ -d $RESULT_DIR ]; then
+        echo "Warning: previous test result left, backuped"
+        mv $RESULT_DIR ${RESULT_DIR}_"$(date +"%F_%H%M")"
+        mv $LOG_DIR ${LOG_DIR}_"$(date +"%F_%H%M")"
+      fi
     fi
-    mkdir $RESULT_DIR || exit
-    mkdir $LOG_DIR || exit
+    mkdir -p $RESULT_DIR || exit
+    mkdir -p $LOG_DIR || exit
     TOTAL_ROUNDS=$((THREAD * $ROUNDS))$
     echo "$TOTAL_ROUNDS" >$TOTAL_ROUNDS_FILE
     date >$TIME_STAMP_FILE
