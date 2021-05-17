@@ -15,7 +15,12 @@ USE_SCREEN=0
 SESSION_NAME=
 
 printHelp(){
+  echo "Without Session Name: the script saves in ./out/"
+  echo "./test -l LEFT_TEAM -r RIGHT_TEAM -p DEFAULT_PORT [-t THREAD] [-ro ROUNDS]"
+  echo "By using Session Name: the script saves in ./SESSION_NAME/"
   echo ./test -l LEFT_TEAM -r RIGHT_TEAM -p DEFAULT_PORT [-t THREAD] [-ro ROUNDS] [-s SESSION_NAME]
+  echo "By using Session Name and Screen: the script saves in ./SESSION_NAME/"
+  echo "User can run some autotest scripts and kill one of them"
   echo screen -S SESSION_NAME -d -m ./test -s SESSION_NAME ...
 }
 
@@ -82,6 +87,9 @@ if [ $USE_SCREEN ];
 then
   RESULT_DIR="${SESSION_NAME}/result.d"
   LOG_DIR="${SESSION_NAME}/log.d"
+else
+  RESULT_DIR="out/result.d"
+  LOG_DIR="out/log.d"
 fi
 TOTAL_ROUNDS_FILE="$RESULT_DIR/total_rounds"
 TIME_STAMP_FILE="$RESULT_DIR/time_stamp"
@@ -170,8 +178,7 @@ autotest() {
     else
       if [ -d $RESULT_DIR ]; then
         echo "Warning: previous test result left, backuped"
-        mv $RESULT_DIR ${RESULT_DIR}_"$(date +"%F_%H%M")"
-        mv $LOG_DIR ${LOG_DIR}_"$(date +"%F_%H%M")"
+        mv out out_"$(date +"%F_%H%M")"
       fi
     fi
     mkdir -p $RESULT_DIR || exit
