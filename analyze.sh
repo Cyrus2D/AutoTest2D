@@ -4,28 +4,27 @@ CURVE="true"
 MAP="true"
 
 TEST_NAME="last"
-printHelp(){
+printHelp() {
   echo "./analyze.sh [-n test_name]"
 }
 
-while [[ $# -gt 0 ]]
-do
-key="$1"
-case $key in
-    -n|--name)
+while [[ $# -gt 0 ]]; do
+  key="$1"
+  case $key in
+  -n | --name)
     TEST_NAME="$2"
     shift 2
     ;;
-    -h)
+  -h)
     printHelp
     exit 0
     ;;
-    *)    # unknown option
+  *) # unknown option
     echo "$1" is not valid
     printHelp
     exit 1
     ;;
-esac
+  esac
 done
 
 DIR="out/last"
@@ -38,15 +37,15 @@ GNUPLOT_MAP="./scripts/map.gp"
 [ -d $RESULT_DIR ] || exit
 
 if [ $CURVE = "true" ]; then
-  ./result.sh -n "$TEST_NAME" --curve > "$CURVE_DATA"
+  ./result.sh -n "$TEST_NAME" --curve >"$CURVE_DATA"
   $GNUPLOT_CURVE
 else
-    echo "$0 -c to output winrate curve"
+  echo "$0 -c to output winrate curve"
 fi
 
 if [ $MAP = "true" ]; then
-  ./result.sh -n "$TEST_NAME" --map > "$MAP_DATA"
+  ./result.sh -n "$TEST_NAME" --map >"$MAP_DATA"
   $GNUPLOT_MAP
 else
-    echo "$0 -m to output score map"
+  echo "$0 -m to output score map"
 fi

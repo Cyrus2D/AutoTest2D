@@ -1,33 +1,36 @@
 #!/bin/bash
 
 TEST_NAME="last"
-printHelp(){
-  echo "./kill.sh [-n screen_name]"
+printHelp() {
+  echo "./kill.sh [-n TEST_NAME]"
+  echo "./kill.sh TEST_NAME"
 }
-if [ $# -eq 1 ]; then
-  TEST_NAME=$1
-else
-  while [[ $# -gt 0 ]]
-  do
+
+while [[ $# -gt 0 ]]; do
   key="$1"
   case $key in
-      -n|--name)
-      TEST_NAME="$2"
-      shift 2
-      ;;
-      -h)
-      printHelp
-      exit 0
-      ;;
-      *)    # unknown option
+  -n | --name)
+    TEST_NAME="$2"
+    shift 2
+    ;;
+  -h)
+    printHelp
+    exit 0
+    ;;
+  *) # unknown option
+    if [ $# = 1 ]; then
+      TEST_NAME="$1"
+    else
       echo "$1" is not valid
       printHelp
-      ;;
+      exit 1
+    fi
+    shift 1
+    ;;
   esac
-  done
-fi
+done
 
-if [[ $TEST_NAME = "all" ]]; then
+if [[ $TEST_NAME == "all" ]]; then
   exec 2>/dev/null
   killall -9 test.sh
   killall -9 rcssserver
@@ -36,14 +39,12 @@ if [[ $TEST_NAME = "all" ]]; then
   rm out/*/PORT*
   rm out/*/PID*
 else
-  for pid in $(cat out/${TEST_NAME}/PID*)
-  do
+  for pid in $(cat out/${TEST_NAME}/PID*); do
     kill -9 $pid
   done
-  for port in $(cat out/${TEST_NAME}/PORT*)
-  do
-    kill -9 `lsof -t -i:${port}`
+  for port in $(cat out/${TEST_NAME}/PORT*); do
+    kill -9 $(lsof -t -i:${port})
   done
-  rm out/${TEST_NAME}/PORT*
-  rm out/${TEST_NAME}/PID*
+  rm out/"${TEST_NAME}"/PORT*
+  rm out/"${TEST_NAME}"/PID*
 fi
