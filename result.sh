@@ -1,18 +1,68 @@
 #!/bin/bash
-SESSION_NAME="."
 
+PARSE="../../scripts/parse.awk"
+PROCESS="../../scripts/process.py"
+DIR="out"
+printHelp(){
+  echo "./result.sh [-s|-n TEST_NAME] [process options]"
+}
+PROCESS_ARGS=""
+while [[ $# -gt 0 ]]
+do
+key="$1"
+case $key in
+    -n|--name|-s)
+    DIR="out_$2"
+    shift 2
+    ;;
+    -C|--console)
+    PROCESS_ARGS="${PROCESS_ARGS}$1 "
+    shift 1
+    ;;
+    -N|--no-color)
+    PROCESS_ARGS="${PROCESS_ARGS}$1 "
+    shift 1
+    ;;
+    -D|--discuz)
+    PROCESS_ARGS="${PROCESS_ARGS}$1 "
+    shift 1
+    ;;
+    -H|--html)
+    PROCESS_ARGS="${PROCESS_ARGS}$1 "
+    shift 1
+    ;;
+    -S|--simplify)
+    PROCESS_ARGS="${PROCESS_ARGS}$1 "
+    shift 1
+    ;;
+    -A|--curve)
+    PROCESS_ARGS="${PROCESS_ARGS}$1 "
+    shift 1
+    ;;
+    -M|--map)
+    PROCESS_ARGS="${PROCESS_ARGS}$1 "
+    shift 1
+    ;;
+    -T|--temp)
+    PROCESS_ARGS="${PROCESS_ARGS}$1 "
+    shift 1
+    ;;
+    -h)
+    printHelp
+    exit 0
+    ;;
+    *)    # unknown option
+    echo "$1" is not valid
+    printHelp
+    exit 1
+    ;;
+esac
+done
 
-PARSE="../scripts/parse.awk"
-PROCESS="../scripts/process.py"
-if [ $# = 1 ]; then
-  SESSION_NAME=$1
-  PARSE="../../scripts/parse.awk"
-  PROCESS="../../scripts/process.py"
-fi
-RESULT_DIR="out_${SESSION_NAME}/result.d"
+RESULT_DIR="${DIR}/result.d"
 
 cd $RESULT_DIR 2>/dev/null || exit
-
+echo `pwd`
 spinner() {
     local DELAY=0.05
 
@@ -30,9 +80,9 @@ if [ $# -le 0 ]; then
     SPINNER_PID=$!
 fi
 
-RESULT=`mktemp`
+RESULT=$(mktemp)
 RESULT_LIST=`ls -1 | grep '[0-9]\+' | sort -n`
-echo >>$RESULT
+echo >>"$RESULT"
 
 parseall() {
     local TITLE="N/A"
@@ -62,14 +112,13 @@ parseall() {
     echo $TITLE
     cat $CACHE_FILE
 }
-
-parseall | python2.7 $PROCESS $* >>$RESULT
+parseall | python2.7 $PROCESS $PROCESS_ARGS >>"$RESULT"
 
 if [ $SPINNER_PID -gt 0 ]; then
     exec 2>/dev/null
     kill $SPINNER_PID
 fi
 
-cat $RESULT
-rm -f $RESULT
+cat "$RESULT"
+rm -f "$RESULT"
 

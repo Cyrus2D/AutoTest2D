@@ -12,16 +12,19 @@ LEFT_TEAM=
 RIGHT_TEAM=
 DEFAULT_PORT=      #default port connecting to server
 USE_SCREEN=0
-SESSION_NAME=
+USE_NAME=0
+TEST_NAME=
 
 printHelp(){
   echo "Without Session Name: the script saves in ./out/"
   echo "./test -l LEFT_TEAM -r RIGHT_TEAM -p DEFAULT_PORT [-t THREAD] [-ro ROUNDS]"
-  echo "By using Session Name: the script saves in ./SESSION_NAME/"
-  echo ./test -l LEFT_TEAM -r RIGHT_TEAM -p DEFAULT_PORT [-t THREAD] [-ro ROUNDS] [-s SESSION_NAME]
-  echo "By using Session Name and Screen: the script saves in ./SESSION_NAME/"
+  echo ""
+  echo "By using Test Name: the script saves in ./out_TEST_NAME/"
+  echo ./test -l LEFT_TEAM -r RIGHT_TEAM -p DEFAULT_PORT [-t THREAD] [-ro ROUNDS] [-n TEST_NAME]
+  echo ""
+  echo "By using Test Name and Screen: the script saves in ./out_TEST_NAME/ and wait for end of process"
   echo "User can run some autotest scripts and kill one of them"
-  echo screen -S SESSION_NAME -d -m ./test -s SESSION_NAME ...
+  echo screen -S TEST_NAME -d -m ./test -n TEST_NAME -s ...
 }
 
 while [[ $# -gt 0 ]]
@@ -50,7 +53,11 @@ case $key in
     ;;
     -s|--screen)
     USE_SCREEN=1
-    SESSION_NAME="$2"
+    shift 1
+    ;;
+    -n|--name)
+    TEST_NAME="$2"
+    USE_NAME=1
     shift 2
     ;;
     -h)
@@ -80,13 +87,15 @@ echo "\$RANDOM_SEED = $RANDOM_SEED"
 echo "\$DEFAULT_PORT = $DEFAULT_PORT"
 echo "\$LEFT_TEAM = $LEFT_TEAM"
 echo "\$RIGHT_TEAM = $RIGHT_TEAM"
+echo "\$USE_SCREEN = $USE_SCREEN"
+echo "\$TEST_NAME = $TEST_NAME"
 
 RESULT_DIR="result.d"
 LOG_DIR="log.d"
-if [ $USE_SCREEN ];
+if (( USE_NAME == 1 )) ;
 then
-  RESULT_DIR="out_${SESSION_NAME}/result.d"
-  LOG_DIR="out_${SESSION_NAME}/log.d"
+  RESULT_DIR="out_${TEST_NAME}/result.d"
+  LOG_DIR="out_${TEST_NAME}/log.d"
 else
   RESULT_DIR="out/result.d"
   LOG_DIR="out/log.d"
@@ -94,7 +103,11 @@ fi
 TOTAL_ROUNDS_FILE="$RESULT_DIR/total_rounds"
 TIME_STAMP_FILE="$RESULT_DIR/time_stamp"
 HTML="$RESULT_DIR/index.html"
-HTML_GENERATING_LOCK="/tmp/autotest_html_generating"
+if (( USE_NAME == 1 )); then
+  HTML_GENERATING_LOCK="/tmp/autotest_html_generating_${TEST_NAME}"
+else
+  HTML_GENERATING_LOCK="/tmp/autotest_html_generating"
+fi
 
 run_server() {
     ulimit -t 300
@@ -154,8 +167,11 @@ generate_html() {
     if [ ! -f $HTML_GENERATING_LOCK ]; then
         touch $HTML $HTML_GENERATING_LOCK
         chmod 777 $HTML $HTML_GENERATING_LOCK 2>/dev/null #allow others to delete or overwrite
-
-        ./result.sh --html >$HTML
+        if [ $USE_NAME ]; then
+          ./result.sh -n "$TEST_NAME" --html >$HTML
+        else
+          ./result.sh --html >$HTML
+        fi
         ./analyze.sh 2>/dev/null
         echo -e "<hr>" >>$HTML
         echo -e "<p><small>""$(whoami)"" @ ""$(date)""</small></p>" >>$HTML
@@ -170,10 +186,10 @@ autotest() {
         echo "Warning: other server running"
         #exit
     fi
-    if [ $USE_SCREEN ]; then
-      if [ -d "out_$SESSION_NAME" ]; then
+    if (( USE_NAME == 1 )); then
+      if [ -d "out_$TEST_NAME" ]; then
         echo "Warning: previous test result left, backuped"
-        mv "out_${SESSION_NAME}" "out_${SESSION_NAME}_$(date +"%F_%H%M")"
+        mv "out_${TEST_NAME}" "out_${TEST_NAME}_$(date +"%F_%H%M")"
       fi
     else
       if [ -d $RESULT_DIR ]; then
@@ -183,7 +199,7 @@ autotest() {
     fi
     mkdir -p $RESULT_DIR || exit
     mkdir -p $LOG_DIR || exit
-    TOTAL_ROUNDS=$((THREAD * $ROUNDS))$
+    TOTAL_ROUNDS=$((THREAD * ROUNDS))$
     echo "$TOTAL_ROUNDS" >$TOTAL_ROUNDS_FILE
     date >$TIME_STAMP_FILE
 
@@ -199,7 +215,6 @@ autotest() {
     return 0
 }
 autotest
-if [ $USE_SCREEN ];
-then
+if (( USE_SCREEN == 1 )); then
   wait
 fi
