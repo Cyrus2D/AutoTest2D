@@ -14,6 +14,7 @@ DEFAULT_PORT=      #default port connecting to server
 USE_SCREEN=0
 USE_NAME=0
 TEST_NAME=
+BUSY_PORT=0
 
 printHelp(){
   echo "Without Session Name: the script saves in ./out/"
@@ -90,12 +91,14 @@ echo "\$RIGHT_TEAM = $RIGHT_TEAM"
 echo "\$USE_SCREEN = $USE_SCREEN"
 echo "\$TEST_NAME = $TEST_NAME"
 
+BASE_DIR="out"
 RESULT_DIR="result.d"
 LOG_DIR="log.d"
 if (( USE_NAME == 1 )) ;
 then
   RESULT_DIR="out_${TEST_NAME}/result.d"
   LOG_DIR="out_${TEST_NAME}/log.d"
+  BASE_DIR="out_${TEST_NAME}"
 else
   RESULT_DIR="out/result.d"
   LOG_DIR="out/log.d"
@@ -120,12 +123,15 @@ server_count() {
 }
 
 match() {
+    local TH_ID=$2
 	  local PORT=$1
 	  local HOST="127.0.0.1"
 	  local OPTIONS=""
     local COACH_PORT=$((PORT+1))
     local OLCOACH_PORT=$((PORT+2))
-
+    echo "$PORT" >> ${BASE_DIR}/Port_${TH_ID}
+    echo "$COACH_PORT" >> ${BASE_DIR}/Port_${TH_ID}
+    echo "$OLCOACH_PORT" >> ${BASE_DIR}/Port_${TH_ID}
     OPTIONS="$OPTIONS -server::port=$PORT"
     OPTIONS="$OPTIONS -server::coach_port=$COACH_PORT"
     OPTIONS="$OPTIONS -server::olcoach_port=$OLCOACH_PORT"
@@ -160,6 +166,7 @@ match() {
       sleep 1
       generate_html
   	done
+  	rm ${BASE_DIR}/Port_${TH_ID}
 }
 
 generate_html() {
@@ -179,9 +186,56 @@ generate_html() {
     fi
 }
 
+check_port(){
+    local i=0
+    while [ $i -lt "$THREAD" ]; do
+        local PORT
+        ADDPort=$((i * 10))
+        PORT=$((DEFAULT_PORT + ADDPort))
+        local COACH_PORT=$((PORT+1))
+        local OLCOACH_PORT=$((PORT+2))
+        PORT_USED=$(lsof -i:$PORT)
+        COACH_PORT_USED=$(lsof -i:$COACH_PORT)
+        OLCOACH_PORT_USED=$(lsof -i:$OLCOACH_PORT)
+        if [[ "${#PORT_USED}" -gt 0 ]]; then
+          BUSY_PORT=$PORT
+          echo "$PORT_USED"
+        fi
+        if [[ "${#COACH_PORT_USED}" -gt 0 ]]; then
+          BUSY_PORT=$COACH_PORT
+          echo "$COACH_PORT_USED"
+        fi
+        if [[ "${#OLCOACH_PORT_USED}" -gt 0 ]]; then
+          BUSY_PORT=$OLCOACH_PORT
+          echo "$OLCOACH_PORT_USED"
+        fi
+        for file in out*/Port*
+        do
+          if grep -q $PORT "$file"; then
+            BUSY_PORT=$PORT
+            echo "***PORT $PORT is being used in $file"
+          fi
+          if grep -q $COACH_PORT "$file"; then
+            BUSY_PORT=$COACH_PORT
+            echo "***PORT $PORT is being used in $file"
+          fi
+          if grep -q $OLCOACH_PORT "$file"; then
+            BUSY_PORT=$OLCOACH_PORT
+            echo "***PORT $PORT is being used in $file"
+          fi
+        done
+        i=$((i + 1))
+        sleep 1
+    done
+}
+
 autotest() {
     export LANG="POSIX"
-
+    check_port
+    if [ $BUSY_PORT -ne 0 ]; then
+      echo "Some ports are busy"
+      exit
+    fi
     if [ "$(server_count)" -gt 0 ]; then
         echo "Warning: other server running"
         #exit
@@ -208,7 +262,7 @@ autotest() {
         local PORT
         ADDPort=$((i * 10))
         PORT=$((DEFAULT_PORT + ADDPort))
-        match $PORT &
+        match $PORT $i &
         i=$((i + 1))
         sleep 1
     done
