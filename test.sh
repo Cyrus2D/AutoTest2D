@@ -11,21 +11,17 @@ FULLSTATE_R="0"        #full state mode for right
 LEFT_TEAM=
 RIGHT_TEAM=
 DEFAULT_PORT=      #default port connecting to server
-USE_SCREEN=0
-USE_NAME=0
-TEST_NAME=
+TEST_NAME="last"
 BUSY_PORT=0
 
 printHelp(){
-  echo "Without Session Name: the script saves in ./out/"
+  echo "Without Session Name: the script saves in ./out/last"
   echo "./test -l LEFT_TEAM -r RIGHT_TEAM -p DEFAULT_PORT [-t THREAD] [-ro ROUNDS]"
   echo ""
-  echo "By using Test Name: the script saves in ./out_TEST_NAME/"
+  echo "By using Test Name: the script saves in ./out/TEST_NAME/"
+  echo "TEST name can not contain _ last all"
   echo ./test -l LEFT_TEAM -r RIGHT_TEAM -p DEFAULT_PORT [-t THREAD] [-ro ROUNDS] [-n TEST_NAME]
   echo ""
-  echo "By using Test Name and Screen: the script saves in ./out_TEST_NAME/ and wait for end of process"
-  echo "User can run some autotest scripts and kill one of them"
-  echo screen -S TEST_NAME -d -m ./test -n TEST_NAME -s ...
 }
 
 while [[ $# -gt 0 ]]
@@ -52,13 +48,8 @@ case $key in
     RIGHT_TEAM="$2"
     shift 2
     ;;
-    -s|--screen)
-    USE_SCREEN=1
-    shift 1
-    ;;
     -n|--name)
     TEST_NAME="$2"
-    USE_NAME=1
     shift 2
     ;;
     -h)
@@ -81,6 +72,18 @@ if ((!success)); then
   printHelp
   exit 1
 fi
+if [[ $TEST_NAME = "all" ]]; then
+  printHelp
+  exit 1
+fi
+if [[ $TEST_NAME = "last" ]]; then
+  printHelp
+  exit 1
+fi
+if [[ $TEST_NAME = *"_"* ]]; then
+  printHelp
+  exit 1
+fi
 
 echo "\$THREAD = $THREAD"
 echo "\$ROUNDS = $ROUNDS"
@@ -88,29 +91,18 @@ echo "\$RANDOM_SEED = $RANDOM_SEED"
 echo "\$DEFAULT_PORT = $DEFAULT_PORT"
 echo "\$LEFT_TEAM = $LEFT_TEAM"
 echo "\$RIGHT_TEAM = $RIGHT_TEAM"
-echo "\$USE_SCREEN = $USE_SCREEN"
 echo "\$TEST_NAME = $TEST_NAME"
 
-BASE_DIR="out"
+BASE_DIR="out/last"
 RESULT_DIR="result.d"
 LOG_DIR="log.d"
-if (( USE_NAME == 1 )) ;
-then
-  RESULT_DIR="out_${TEST_NAME}/result.d"
-  LOG_DIR="out_${TEST_NAME}/log.d"
-  BASE_DIR="out_${TEST_NAME}"
-else
-  RESULT_DIR="out/result.d"
-  LOG_DIR="out/log.d"
-fi
+RESULT_DIR="out/${TEST_NAME}/result.d"
+LOG_DIR="out/${TEST_NAME}/log.d"
+BASE_DIR="out/${TEST_NAME}"
 TOTAL_ROUNDS_FILE="$RESULT_DIR/total_rounds"
 TIME_STAMP_FILE="$RESULT_DIR/time_stamp"
 HTML="$RESULT_DIR/index.html"
-if (( USE_NAME == 1 )); then
-  HTML_GENERATING_LOCK="/tmp/autotest_html_generating_${TEST_NAME}"
-else
-  HTML_GENERATING_LOCK="/tmp/autotest_html_generating"
-fi
+HTML_GENERATING_LOCK="/tmp/autotest_html_generating_${TEST_NAME}"
 
 run_server() {
     ulimit -t 300
@@ -123,20 +115,20 @@ server_count() {
 }
 
 match() {
+    local PORT=$1
     local TH_ID=$2
-	  local PORT=$1
 	  local HOST="127.0.0.1"
 	  local OPTIONS=""
     local COACH_PORT=$((PORT+1))
     local OLCOACH_PORT=$((PORT+2))
-    echo "$PORT" >> ${BASE_DIR}/Port_${TH_ID}
-    echo "$COACH_PORT" >> ${BASE_DIR}/Port_${TH_ID}
-    echo "$OLCOACH_PORT" >> ${BASE_DIR}/Port_${TH_ID}
+    echo "$PORT" >> ${BASE_DIR}/PORT_${TH_ID}
+    echo "$COACH_PORT" >> ${BASE_DIR}/PORT_${TH_ID}
+    echo "$OLCOACH_PORT" >> ${BASE_DIR}/PORT_${TH_ID}
     OPTIONS="$OPTIONS -server::port=$PORT"
     OPTIONS="$OPTIONS -server::coach_port=$COACH_PORT"
     OPTIONS="$OPTIONS -server::olcoach_port=$OLCOACH_PORT"
     OPTIONS="$OPTIONS -player::random_seed=$RANDOM_SEED"
-    OPTIONS="$OPTIONS -server::nr_normal_halfs=2 -server::nr_extra_halfs=0"
+    OPTIONS="$OPTIONS -server::nr_normal_halfs=2 -server::nr_extra_halfs=0 -server::half_time = 300"
     OPTIONS="$OPTIONS -server::penalty_shoot_outs=false -server::auto_mode=on"
     OPTIONS="$OPTIONS -server::game_logging=$GAME_LOGGING -server::text_logging=$TEXT_LOGGING"
     OPTIONS="$OPTIONS -server::game_log_compression=0 -server::text_log_compression=0"
@@ -166,7 +158,9 @@ match() {
       sleep 1
       generate_html
   	done
-  	rm ${BASE_DIR}/Port_${TH_ID}
+
+    rm "${BASE_DIR}/PORT_${TH_ID}"
+    rm "${BASE_DIR}/PID_${TH_ID}"
 }
 
 generate_html() {
@@ -174,12 +168,8 @@ generate_html() {
     if [ ! -f $HTML_GENERATING_LOCK ]; then
         touch $HTML $HTML_GENERATING_LOCK
         chmod 777 $HTML $HTML_GENERATING_LOCK 2>/dev/null #allow others to delete or overwrite
-        if [ $USE_NAME ]; then
-          ./result.sh -n "$TEST_NAME" --html >$HTML
-        else
-          ./result.sh --html >$HTML
-        fi
-        ./analyze.sh 2>/dev/null
+        ./result.sh -n "$TEST_NAME" --html >$HTML
+        ./analyze.sh -n "$TEST_NAME" 2>/dev/null
         echo -e "<hr>" >>$HTML
         echo -e "<p><small>""$(whoami)"" @ ""$(date)""</small></p>" >>$HTML
         rm -f $HTML_GENERATING_LOCK
@@ -209,8 +199,9 @@ check_port(){
           BUSY_PORT=$OLCOACH_PORT
           echo "$OLCOACH_PORT_USED"
         fi
-        for file in out*/Port*
+        for file in out*/PORT*
         do
+          [[ -e "$file" ]] || break
           if grep -q $PORT "$file"; then
             BUSY_PORT=$PORT
             echo "***PORT $PORT is being used in $file"
@@ -240,16 +231,9 @@ autotest() {
         echo "Warning: other server running"
         #exit
     fi
-    if (( USE_NAME == 1 )); then
-      if [ -d "out_$TEST_NAME" ]; then
-        echo "Warning: previous test result left, backuped"
-        mv "out_${TEST_NAME}" "out_${TEST_NAME}_$(date +"%F_%H%M")"
-      fi
-    else
-      if [ -d $RESULT_DIR ]; then
-        echo "Warning: previous test result left, backuped"
-        mv "out" "out_$(date +"%F_%H%M")"
-      fi
+    if [ -d "out/$TEST_NAME" ]; then
+      echo "Warning: previous test result left, backuped"
+      mv "out/${TEST_NAME}" "out/${TEST_NAME}_$(date +"%F_%H%M")"
     fi
     mkdir -p $RESULT_DIR || exit
     mkdir -p $LOG_DIR || exit
@@ -263,12 +247,11 @@ autotest() {
         ADDPort=$((i * 10))
         PORT=$((DEFAULT_PORT + ADDPort))
         match $PORT $i &
+        echo $! >> ${BASE_DIR}/PID_$i
         i=$((i + 1))
         sleep 1
     done
     return 0
 }
 autotest
-if (( USE_SCREEN == 1 )); then
-  wait
-fi
+

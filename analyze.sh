@@ -2,19 +2,18 @@
 
 CURVE="true"
 MAP="true"
-DIR="out"
-USE_SCREEN=0
+
+TEST_NAME="last"
 printHelp(){
-  echo "./analyze.sh [-s SESSION_NAME]"
+  echo "./analyze.sh [-n test_name]"
 }
 
 while [[ $# -gt 0 ]]
 do
 key="$1"
 case $key in
-    -s|--screen)
-    DIR="out_$2"
-    USE_SCREEN=1
+    -n|--name)
+    TEST_NAME="$2"
     shift 2
     ;;
     -h)
@@ -29,6 +28,7 @@ case $key in
 esac
 done
 
+DIR="out/last"
 RESULT_DIR="${DIR}/result.d"
 CURVE_DATA="$RESULT_DIR/curve"
 MAP_DATA="$RESULT_DIR/map"
@@ -38,22 +38,14 @@ GNUPLOT_MAP="./scripts/map.gp"
 [ -d $RESULT_DIR ] || exit
 
 if [ $CURVE = "true" ]; then
-  if [ $USE_SCREEN ]; then
-    ./result.sh -s "$SESSION_NAME" --curve > "$CURVE_DATA"
-  else
-    ./result.sh --curve > "$CURVE_DATA"
-  fi
+  ./result.sh -n "$TEST_NAME" --curve > "$CURVE_DATA"
   $GNUPLOT_CURVE
 else
     echo "$0 -c to output winrate curve"
 fi
 
 if [ $MAP = "true" ]; then
-  if [ $USE_SCREEN ]; then
-    ./result.sh -s "$SESSION_NAME" --map > "$MAP_DATA"
-  else
-    ./result.sh --map > "$MAP_DATA"
-  fi
+  ./result.sh -n "$TEST_NAME" --map > "$MAP_DATA"
   $GNUPLOT_MAP
 else
     echo "$0 -m to output score map"

@@ -1,25 +1,19 @@
 #!/bin/bash
 
-KILL_SCREEN=0
-SCREEN_NAME=""
+TEST_NAME="last"
 printHelp(){
-  echo "./kill.sh [-s] [-n screen_name]"
+  echo "./kill.sh [-n screen_name]"
 }
 if [ $# -eq 1 ]; then
-  SCREEN_NAME=$1
-#  KILL_SCREEN=1
+  TEST_NAME=$1
 else
   while [[ $# -gt 0 ]]
   do
   key="$1"
   case $key in
       -n|--name)
-      SCREEN_NAME="$2"
+      TEST_NAME="$2"
       shift 2
-      ;;
-      -s|--screen)
-      KILL_SCREEN=1
-      shift 1
       ;;
       -h)
       printHelp
@@ -33,19 +27,23 @@ else
   done
 fi
 
-if [ $KILL_SCREEN = 1 ]; then
-  screen -XS "$SCREEN_NAME" quit
-  rm out_${SCREEN_NAME}_*/Port*
-else
+if [[ $TEST_NAME = "all" ]]; then
   exec 2>/dev/null
   killall -9 test.sh
   killall -9 rcssserver
   killall -9 rcssserver.bin
   rm -f "/tmp/autotest::temp"
-  if [ $SCREEN_NAME -eq "" ]; then
-    rm out/Port*
-  else
-    rm out_${SCREEN_NAME}*/Port*
-  fi
-
+  rm out/*/PORT*
+  rm out/*/PID*
+else
+  for pid in $(cat out/${TEST_NAME}/PID*)
+  do
+    kill -9 $pid
+  done
+  for port in $(cat out/${TEST_NAME}/PORT*)
+  do
+    kill -9 `lsof -t -i:${port}`
+  done
+  rm out/${TEST_NAME}/PORT*
+  rm out/${TEST_NAME}/PID*
 fi

@@ -1,18 +1,19 @@
 #!/bin/bash
 
-PARSE="../../scripts/parse.awk"
-PROCESS="../../scripts/process.py"
-DIR="out"
+PARSE="../../../scripts/parse.awk"
+PROCESS="../../../scripts/process.py"
+TEST_NAME="last"
+
 printHelp(){
-  echo "./result.sh [-s|-n TEST_NAME] [process options]"
+  echo "./result.sh [-n TEST_NAME] [process options]"
 }
 PROCESS_ARGS=""
 while [[ $# -gt 0 ]]
 do
 key="$1"
 case $key in
-    -n|--name|-s)
-    DIR="out_$2"
+    -n|--name)
+    TEST_NAME="$2"
     shift 2
     ;;
     -C|--console)
@@ -58,7 +59,7 @@ case $key in
     ;;
 esac
 done
-
+DIR="out/${TEST_NAME}"
 RESULT_DIR="${DIR}/result.d"
 
 cd $RESULT_DIR 2>/dev/null || exit
