@@ -1,15 +1,15 @@
 #!/bin/bash
 #$HOST $PORT $OLCOACH_PORT $RIGHT_TEAM $LEFT_RESULT
-echo 'starttttttttttttttttttt'
 HOST=$1
 PORT=$2
 OLCOACH_PORT=$3
 TEAM=$4
 RESULT=$5
-echo *****STARTING $HOST $PORT $OLCOACH_PORT $OLC$TEAM $RESULT
-
-if [[ $TEAM = "cr19" ]]; then
-  cd /home/nader/workspace/robo/japan_bin/r0/CYRUS && ./auto.sh $PORT $OLCOACH_PORT &> $RESULT
+echo "*****STARTING $HOST $PORT $OLCOACH_PORT $OLC$TEAM $RESULT"
+if [[ $# = 6 ]]; then
+  cd $6 && ./auto.sh $PORT $OLCOACH_PORT &> "$RESULT"
+elif [[ $TEAM = "cr19" ]]; then
+  cd /home/nader/workspace/robo/japan_bin/r0/CYRUS && ./auto.sh $PORT $OLCOACH_PORT &> "$RESULT"
 elif [[ $TEAM = "razi19" ]]; then
   cd /home/nader/workspace/robo/bin/razi && ./auto.sh $PORT $OLCOACH_PORT &> $RESULT
 elif [[ $TEAM = "hel19" ]]; then

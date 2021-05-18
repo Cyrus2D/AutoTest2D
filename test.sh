@@ -13,6 +13,8 @@ RIGHT_TEAM=
 DEFAULT_PORT=      #default port connecting to server
 TEST_NAME="last"
 BUSY_PORT=0
+COPY_BINARY=0
+BINARY_ADDRESS=""
 
 printHelp(){
   echo "Without Session Name: the script saves in ./out/last"
@@ -50,6 +52,11 @@ case $key in
     ;;
     -n|--name)
     TEST_NAME="$2"
+    shift 2
+    ;;
+    -cb)
+    COPY_BINARY=1
+    BINARY_ADDRESS="$2"
     shift 2
     ;;
     -h)
@@ -93,12 +100,10 @@ echo "\$LEFT_TEAM = $LEFT_TEAM"
 echo "\$RIGHT_TEAM = $RIGHT_TEAM"
 echo "\$TEST_NAME = $TEST_NAME"
 
-BASE_DIR="out/last"
-RESULT_DIR="result.d"
-LOG_DIR="log.d"
-RESULT_DIR="out/${TEST_NAME}/result.d"
-LOG_DIR="out/${TEST_NAME}/log.d"
 BASE_DIR="out/${TEST_NAME}"
+RESULT_DIR="${BASE_DIR}/result.d"
+LOG_DIR="${BASE_DIR}/log.d"
+NEW_BIN_DIR="${BASE_DIR}/bin"
 TOTAL_ROUNDS_FILE="$RESULT_DIR/total_rounds"
 TIME_STAMP_FILE="$RESULT_DIR/time_stamp"
 HTML="$RESULT_DIR/index.html"
@@ -114,6 +119,10 @@ server_count() {
     ps -o pid= -C rcssserver | wc -l
 }
 
+prepare_binary(){
+  mkdir $NEW_BIN_DIR
+  cp -r $BINARY_ADDRESS/* $NEW_BIN_DIR
+}
 match() {
     local PORT=$1
     local TH_ID=$2
@@ -149,8 +158,11 @@ match() {
       local RIGHT_RESULT="${PWD}/${RESULT_DIR}/${TIME}_R"
 		  if [ ! -f "$RESULT" ]; then
         local FULL_OPTIONS=""
-        FULL_OPTIONS="$OPTIONS -server::team_r_start=\"./start_team $HOST $PORT $OLCOACH_PORT $RIGHT_TEAM $RIGHT_RESULT\""
-        FULL_OPTIONS="$FULL_OPTIONS -server::team_l_start=\"./start_team $HOST $PORT $OLCOACH_PORT $LEFT_TEAM $LEFT_RESULT\""
+        FULL_OPTIONS="$OPTIONS -server::team_l_start=\"./start_team $HOST $PORT $OLCOACH_PORT $LEFT_TEAM $LEFT_RESULT\""
+        if [ $COPY_BINARY = 1 ]; then
+          FULL_OPTIONS="$OPTIONS -server::team_l_start=\"./start_team $HOST $PORT $OLCOACH_PORT $LEFT_TEAM $LEFT_RESULT $NEW_BIN_DIR\""
+        fi
+        FULL_OPTIONS="$FULL_OPTIONS -server::team_r_start=\"./start_team $HOST $PORT $OLCOACH_PORT $RIGHT_TEAM $RIGHT_RESULT\""
         FULL_OPTIONS="$FULL_OPTIONS -server::game_log_dir=\"./$LOG_DIR/\" -server::text_log_dir=\"./$LOG_DIR/\""
         FULL_OPTIONS="$FULL_OPTIONS -server::game_log_fixed_name=\"$TIME\" -server::text_log_fixed_name=\"$TIME\""
         run_server $FULL_OPTIONS  &>$RESULT
@@ -241,6 +253,7 @@ autotest() {
     echo "$TOTAL_ROUNDS" >$TOTAL_ROUNDS_FILE
     date >$TIME_STAMP_FILE
 
+    prepare_binary
     local i=0
     while [ $i -lt "$THREAD" ]; do
         local PORT
