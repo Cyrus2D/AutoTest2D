@@ -1,6 +1,6 @@
 BEGIN {
     valid = 0
-
+    killedPlayers = ""
     waiting_ln = -1
     player_disconnected_ln = -1
     coach_disconnected_ln = -1
@@ -18,6 +18,8 @@ BEGIN {
         waiting_ln = NR
     }
     else if ($0 ~ /A player disconnected/) {
+        if (waiting_ln<0)
+            killedPlayers+= $5 + $6
         if (player_disconnected_ln <= 0) {
             player_disconnected_ln = NR
         }
@@ -45,7 +47,7 @@ END {
     }
 
     if (left_score >= 0 && right_score >= 0) {
-        print left_score, right_score, left_shoot_count, valid, miss_count, FILENAME
+        print left_score, right_score, left_shoot_count, valid, miss_count,killedPlayers, FILENAME
     }
 }
 
