@@ -391,13 +391,9 @@ class GameData:
 
     def generate_context(self, lines):
         self.title = lines.pop(0)
-
         for line in lines:
             parts = line.split()
-            print len(parts)
-
             parts = map(int, parts[:5]) + parts[-1:]+[" ".join(parts[5:-1])]
-            print parts
             self.update(*parts)
 
 
