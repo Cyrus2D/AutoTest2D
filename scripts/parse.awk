@@ -19,12 +19,14 @@ BEGIN {
     }
     else if ($0 ~ /A player disconnected/) {
         if (waiting_ln<0)
-            killedPlayers+= $5 + $6
+            killedPlayers=killedPlayers" "$5" "$6
         if (player_disconnected_ln <= 0) {
             player_disconnected_ln = NR
         }
     }
     else if ($0 ~ /An online coach disconnected/) {
+	if(waiting_ln<0)
+	    killedPlayers=killedPlayers" "$6" Coach"
         if (coach_disconnected_ln <= 0) {
             coach_disconnected_ln = NR
         }
