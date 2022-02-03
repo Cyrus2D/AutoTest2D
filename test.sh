@@ -14,6 +14,7 @@ DEFAULT_PORT= #default port connecting to server
 TEST_NAME="last"
 BUSY_PORT=0
 COPY_BINARY=0
+SHOW_RESULT=0
 BINARY_ADDRESS=""
 
 printHelp() {
@@ -65,6 +66,9 @@ while [[ $# -gt 0 ]]; do
   -h)
     printHelp
     exit 0
+    ;;
+  -R | --result)
+    SHOW_RESULT=1
     ;;
   *) # unknown option
     echo "$1" is not valid
@@ -274,4 +278,20 @@ autotest() {
   done
   return 0
 }
+
 autotest
+if [ $SHOW_RESULT -ne 0 ]; then
+  while true
+  do
+	  running=$(pgrep rcssserver)
+	  if [ -z $running ]; then
+		  echo "finished"
+		  bash "result.sh TEST_NAME"
+		  break
+	  else
+		  echo "still running"
+		  sleep 10
+	  fi
+
+  done
+fi
