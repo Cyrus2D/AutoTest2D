@@ -281,9 +281,9 @@ autotest() {
     while true
     do
 	    running=$(pgrep rcssserver)
-	    if [ -z $running ]; then
+	    if [ -z "$running" ]; then
 		    echo "finished"
-		    bash "result.sh TEST_NAME"
+		    bash "result.sh $TEST_NAME"
 		    break
 	    else
 		    echo "still running"
