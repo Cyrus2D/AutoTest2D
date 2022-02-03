@@ -69,6 +69,7 @@ while [[ $# -gt 0 ]]; do
     ;;
   -R | --result)
     SHOW_RESULT=1
+    shift 1
     ;;
   *) # unknown option
     echo "$1" is not valid
