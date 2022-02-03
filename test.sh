@@ -99,15 +99,15 @@ if [[ $TEST_NAME == *"_"* ]]; then
   printHelp
   exit 1
 fi
-
-echo "\$THREAD = $THREAD"
-echo "\$ROUNDS = $ROUNDS"
-echo "\$RANDOM_SEED = $RANDOM_SEED"
-echo "\$DEFAULT_PORT = $DEFAULT_PORT"
-echo "\$LEFT_TEAM = $LEFT_TEAM"
-echo "\$RIGHT_TEAM = $RIGHT_TEAM"
-echo "\$TEST_NAME = $TEST_NAME"
-
+if [ $SHOW_RESULT -eq 0 ]; then
+  echo "\$THREAD = $THREAD"
+  echo "\$ROUNDS = $ROUNDS"
+  echo "\$RANDOM_SEED = $RANDOM_SEED"
+  echo "\$DEFAULT_PORT = $DEFAULT_PORT"
+  echo "\$LEFT_TEAM = $LEFT_TEAM"
+  echo "\$RIGHT_TEAM = $RIGHT_TEAM"
+  echo "\$TEST_NAME = $TEST_NAME"
+fi
 BASE_DIR="out/${TEST_NAME}"
 RESULT_DIR="${BASE_DIR}/result.d"
 LOG_DIR="${BASE_DIR}/log.d"
@@ -282,11 +282,9 @@ autotest() {
     do
 	    running=$(pgrep rcssserver)
 	    if [ -z "$running" ]; then
-		    echo "finished"
-		    bash "result.sh $TEST_NAME"
+		    ./result.sh -n "$TEST_NAME"
 		    break
 	    else
-		    echo "still running"
 		    sleep 10
 	    fi
 
