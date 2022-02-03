@@ -276,22 +276,22 @@ autotest() {
     i=$((i + 1))
     sleep 1
   done
+  if [ $SHOW_RESULT -ne 0 ]; then
+    while true
+    do
+	    running=$(pgrep rcssserver)
+	    if [ -z $running ]; then
+		    echo "finished"
+		    bash "result.sh TEST_NAME"
+		    break
+	    else
+		    echo "still running"
+		    sleep 10
+	    fi
+
+    done
+  fi
   return 0
 }
 
 autotest
-if [ $SHOW_RESULT -ne 0 ]; then
-  while true
-  do
-	  running=$(pgrep rcssserver)
-	  if [ -z $running ]; then
-		  echo "finished"
-		  bash "result.sh TEST_NAME"
-		  break
-	  else
-		  echo "still running"
-		  sleep 10
-	  fi
-
-  done
-fi
