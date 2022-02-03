@@ -9,6 +9,7 @@ printHelp() {
   echo "./result.sh TEST_NAME"
 }
 PROCESS_ARGS=""
+RESULT_ONLY=0
 while [[ $# -gt 0 ]]; do
   key="$1"
   case $key in
@@ -22,6 +23,10 @@ while [[ $# -gt 0 ]]; do
     ;;
   -N | --no-color)
     PROCESS_ARGS="${PROCESS_ARGS}$1 "
+    shift 1
+    ;;
+  -R | --result)
+    RESULT_ONLY=1
     shift 1
     ;;
   -D | --discuz)
@@ -68,7 +73,9 @@ DIR="out/${TEST_NAME}"
 RESULT_DIR="${DIR}/result.d"
 
 cd $RESULT_DIR 2>/dev/null || exit
-echo $(pwd)
+if [ $RESULT_ONLY -eq 0 ]; then
+  echo $(pwd)
+fi
 spinner() {
   local DELAY=0.05
 
@@ -85,7 +92,7 @@ spinner() {
 }
 
 SPINNER_PID=-1
-if [ $# -le 0 ]; then
+if [ $# -le 0 ] && [ $RESULT_ONLY -eq 0 ]; then
   spinner &
   SPINNER_PID=$!
 fi

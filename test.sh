@@ -282,7 +282,7 @@ autotest() {
     do
 	    running=$(pgrep rcssserver)
 	    if [ -z "$running" ]; then
-		    ./result.sh -n "$TEST_NAME"
+		    ./result.sh -n "$TEST_NAME" -R
 		    break
 	    else
 		    sleep 10
