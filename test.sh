@@ -247,15 +247,15 @@ check_port() {
 autotest() {
   export LANG="POSIX"
   check_port
-  if [ $BUSY_PORT -ne 0 ]; then
+  if [ $BUSY_PORT -ne 0 ] && [ $SHOW_RESULT -eq 0 ] ; then
     echo "Some ports are busy"
     exit
   fi
-  if [ "$(server_count)" -gt 0 ]; then
+  if [ "$(server_count)" -gt 0 ] && [ $SHOW_RESULT -eq 0 ] ; then
     echo "Warning: other server running"
     #exit
   fi
-  if [ -d "out/$TEST_NAME" ]; then
+  if [ -d "out/$TEST_NAME" ] && [ $SHOW_RESULT -eq 0 ] ; then
     echo "Warning: previous test result left, backuped"
     mv "out/${TEST_NAME}" "out/${TEST_NAME}_$(date +"%F_%H%M")"
   fi

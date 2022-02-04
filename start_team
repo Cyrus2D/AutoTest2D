@@ -134,13 +134,15 @@ elif [[ $TEAM == "2021_aras" ]]; then
   cd ${bin}/2021_aras/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
 elif [[ $TEAM == "2021_austras2d" ]]; then
   cd ${bin}/2021_austras2d/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "test" ]]; then
+  cd ../test/src && ./auto.sh $HOST $PORT $OLCOACH_PORT &>"$RESULT"
 elif [[ $TEAM == "2021_cyrus" ]]; then
   cd ${bin}/2021_cyrus/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
-  elif [[ $TEAM == "2021_cyrus_r4" ]]; then
+elif [[ $TEAM == "2021_cyrus_r4" ]]; then
   cd ${bin}/2021_cyrus_r4/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
-  elif [[ $TEAM == "2021_cyrus_r3" ]]; then
+elif [[ $TEAM == "2021_cyrus_r3" ]]; then
   cd ${bin}/2021_cyrus_r3/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
-  elif [[ $TEAM == "2021_cyrus_r2" ]]; then
+elif [[ $TEAM == "2021_cyrus_r2" ]]; then
   cd ${bin}/2021_cyrus_r2/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
 elif [[ $TEAM == "2021_fra-united" ]]; then
   cd ${bin}/2021_fra-united/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
