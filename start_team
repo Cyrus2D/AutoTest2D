@@ -135,7 +135,7 @@ elif [[ $TEAM == "2021_aras" ]]; then
 elif [[ $TEAM == "2021_austras2d" ]]; then
   cd ${bin}/2021_austras2d/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
 elif [[ $TEAM == "test" ]]; then
-  cd ../test/src && ./auto.sh $HOST $PORT $OLCOACH_PORT &>"$RESULT"
+  cd ../test/src && ./auto.sh -h $HOST -p $PORT -P $OLCOACH_PORT &>"$RESULT"
 elif [[ $TEAM == "2021_cyrus" ]]; then
   cd ${bin}/2021_cyrus/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
 elif [[ $TEAM == "2021_cyrus_r4" ]]; then
