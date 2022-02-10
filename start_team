@@ -7,8 +7,9 @@ TEAM=$4
 RESULT=$5
 bin=/data1/nader/workspace/robo/allgames/bins
 echo "*****STARTING $HOST $PORT $OLCOACH_PORT $OLC$TEAM $RESULT"
-
-if [[ $TEAM == "2016_csu_yunlu" ]]; then
+if [[ $# == 6 ]]; then
+  cd $6 && ./auto.sh -h $HOST -p $PORT -P $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2016_csu_yunlu" ]]; then
   cd ${bin}/2016_csu_yunlu/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
 elif [[ $TEAM == "2016_cyrus" ]]; then
   cd ${bin}/2016_cyrus/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
@@ -149,7 +150,7 @@ elif [[ $TEAM == "2021_fra-united" ]]; then
 elif [[ $TEAM == "2021_hades2d" ]]; then
   cd ${bin}/2021_hades2d/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
 elif [[ $TEAM == "2021_helios" ]]; then
-  cd ${bin}/2021_helios/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+  cd /home/arad/hel2021 && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
 elif [[ $TEAM == "2021_hfutengine" ]]; then
   cd ${bin}/2021_hfutengine/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
 elif [[ $TEAM == "2021_itandroids" ]]; then
