@@ -5,46 +5,170 @@ PORT=$2
 OLCOACH_PORT=$3
 TEAM=$4
 RESULT=$5
+bin=/data1/nader/workspace/robo/allgames/bins
 echo "*****STARTING $HOST $PORT $OLCOACH_PORT $OLC$TEAM $RESULT"
 if [[ $# == 6 ]]; then
-  cd $6 && ./auto.sh $PORT $OLCOACH_PORT &>"$RESULT"
-elif [[ $TEAM == "cr19" ]]; then
-  cd /home/nader/workspace/robo/japan_bin/r0/CYRUS && ./auto.sh $PORT $OLCOACH_PORT &>"$RESULT"
-elif [[ $TEAM == "razi19" ]]; then
-  cd /home/nader/workspace/robo/bin/razi && ./auto.sh $PORT $OLCOACH_PORT &>"$RESULT"
-elif [[ $TEAM == "hel19" ]]; then
-  cd /home/nader/workspace/robo/bin/helios && ./auto.sh $HOST $PORT $OLCOACH_PORT &>"$RESULT"
-elif [[ $TEAM == "hel20" ]]; then
-  cd /home/nader/workspace/robo/bin/helios2020 && ./auto.sh $HOST $PORT $OLCOACH_PORT &>"$RESULT"
-elif [[ $TEAM == "rec19" ]]; then
-  cd /home/nader/workspace/robo/bin/receptivity && ./auto.sh $PORT $OLCOACH_PORT &>"$RESULT"
-elif [[ $TEAM == "base" ]]; then
-  cd /home/nader/workspace/robo/agent2d-3.1.1/src && ./auto.sh -p $PORT -P $OLCOACH_PORT &>"$RESULT"
-elif [[ $TEAM == "mt19" ]]; then
-  cd /home/nader/workspace/robo/bin/mt && ./auto.sh $PORT $OLCOACH_PORT &>"$RESULT"
-elif [[ $TEAM == "wr" ]]; then
-  cd /home/nader/workspace/robo/bin/wrighteagle && ./start-local.sh $PORT $OLCOACH_PORT &>"$RESULT"
-elif [[ $TEAM == "oxsy" ]]; then
-  cd /home/nader/Documents/bin/17/oxsy && ./auto.sh $HOST $PORT $OLCOACH_PORT &>"$RESULT"
-elif [[ $TEAM == "fra" ]]; then
-  cd /home/nader/drive/bin/18/fraunited && ./startAll &>"$RESULT"
-elif [[ $TEAM == "yush19" ]]; then
-  cd /home/nader/workspace/robo/bin/yushan && ./start.sh $PORT $OLCOACH_PORT &>"$RESULT"
-elif [[ $TEAM == "kn18" ]]; then
-  cd /home/nader/drive/bin/18/asia-material-KN2C/KN2C2018-Bin && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
-elif [[ $TEAM == "mt18" ]]; then
-  cd /home/nader/drive/bin/18/mt && ./auto.sh $HOST $PORT $OLCOACH_PORT &>"$RESULT"
-elif [[ $TEAM == "mt19" ]]; then
-  cd /home/nader/drive/bin/19/mt && ./auto.sh $HOST $PORT $OLCOACH_PORT &>"$RESULT"
-elif [[ $TEAM == "it18" ]]; then
-  cd /home/nader/drive/bin/18/itandroids && ./auto.sh $HOST $PORT $OLCOACH_PORT &>"$RESULT"
-elif [[ $TEAM == "ox18" ]]; then
-  cd /home/nader/drive/bin/18/oxsy && ./auto.sh $HOST $PORT $OLCOACH_PORT &>"$RESULT"
-elif [[ $TEAM == "cr18" ]]; then
-  cd /home/nader/drive/bin/18/cyrus_round_3/src && ./auto.sh -p $PORT -P $OLCOACH_PORT &>"$RESULT"
-elif [[ $TEAM == "base" ]]; then
-  cd /home/nader/workspace/robo/agent2d-3.1.1/src && ./auto.sh -p $PORT -P $OLCOACH_PORT &>"$RESULT"
-else
-  echo "${TEAM} is not found" >>"$RESULT"
+  cd $6 && ./auto.sh -h $HOST -p $PORT -P $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2016_csu_yunlu" ]]; then
+  cd ${bin}/2016_csu_yunlu/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2016_cyrus" ]]; then
+  cd ${bin}/2016_cyrus/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2016_fcp_gpr" ]]; then
+  cd ${bin}/2016_fcp_gpr/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2016_fra" ]]; then
+  cd ${bin}/2016_fra/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2016_fury" ]]; then
+  cd ${bin}/2016_fury/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2016_gliders" ]]; then
+  cd ${bin}/2016_gliders/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2016_helios" ]]; then
+  cd ${bin}/2016_helios/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2016_hermes" ]]; then
+  cd ${bin}/2016_hermes/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2016_hfutengine" ]]; then
+  cd ${bin}/2016_hfutengine/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2016_hillstone" ]]; then
+  cd ${bin}/2016_hillstone/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2016_itandroids" ]]; then
+  cd ${bin}/2016_itandroids/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2016_lefteagle" ]]; then
+  cd ${bin}/2016_lefteagle/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2016_marlik" ]]; then
+  cd ${bin}/2016_marlik/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2016_mt" ]]; then
+  cd ${bin}/2016_mt/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2016_oxsy" ]]; then
+  cd ${bin}/2016_oxsy/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2016_ri-one" ]]; then
+  cd ${bin}/2016_ri-one/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2016_shiraz" ]]; then
+  cd ${bin}/2016_shiraz/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2017_alice" ]]; then
+  cd ${bin}/2017_alice/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2017_csuyunlu" ]]; then
+  cd ${bin}/2017_csuyunlu/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2017_cyrus" ]]; then
+  cd ${bin}/2017_cyrus/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2017_fifty-storms" ]]; then
+  cd ${bin}/2017_fifty-storms/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2017_fra" ]]; then
+  cd ${bin}/2017_fra/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2017_helios" ]]; then
+  cd ${bin}/2017_helios/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2017_hfutengine" ]]; then
+  cd ${bin}/2017_hfutengine/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2017_hillstone" ]]; then
+  cd ${bin}/2017_hillstone/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2017_itandroids" ]]; then
+  cd ${bin}/2017_itandroids/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2017_mt" ]]; then
+  cd ${bin}/2017_mt/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2017_nexus2d" ]]; then
+  cd ${bin}/2017_nexus2d/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2017_oxsy" ]]; then
+  cd ${bin}/2017_oxsy/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2017_persiangulf" ]]; then
+  cd ${bin}/2017_persiangulf/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2017_rione" ]]; then
+  cd ${bin}/2017_rione/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2017_ziziphus" ]]; then
+  cd ${bin}/2017_ziziphus/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2018_alice" ]]; then
+  cd ${bin}/2018_alice/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2018_cyrus" ]]; then
+  cd ${bin}/2018_cyrus/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2018_fcpgpr" ]]; then
+  cd ${bin}/2018_fcpgpr/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2018_fraunited" ]]; then
+  cd ${bin}/2018_fraunited/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2018_helios" ]]; then
+  cd ${bin}/2018_helios/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2018_hillstone" ]]; then
+  cd ${bin}/2018_hillstone/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2018_itandroids" ]]; then
+  cd ${bin}/2018_itandroids/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2018_mt" ]]; then
+  cd ${bin}/2018_mt/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2018_namira" ]]; then
+  cd ${bin}/2018_namira/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2018_oxsy" ]]; then
+  cd ${bin}/2018_oxsy/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2018_razi" ]]; then
+  cd ${bin}/2018_razi/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2018_rione" ]]; then
+  cd ${bin}/2018_rione/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2018_yushan" ]]; then
+  cd ${bin}/2018_yushan/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2019_cyrus" ]]; then
+  cd ${bin}/2019_cyrus/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2019_fcpgpr" ]]; then
+  cd ${bin}/2019_fcpgpr/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2019_fractals" ]]; then
+  cd ${bin}/2019_fractals/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2019_fraunited" ]]; then
+  cd ${bin}/2019_fraunited/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2019_helios" ]]; then
+  cd ${bin}/2019_helios/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2019_hfutengine" ]]; then
+  cd ${bin}/2019_hfutengine/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2019_hillstone" ]]; then
+  cd ${bin}/2019_hillstone/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2019_itandroids" ]]; then
+  cd ${bin}/2019_itandroids/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2019_mt" ]]; then
+  cd ${bin}/2019_mt/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2019_razi" ]]; then
+  cd ${bin}/2019_razi/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2019_receptivity" ]]; then
+  cd ${bin}/2019_receptivity/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2019_rione" ]]; then
+  cd ${bin}/2019_rione/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2019_robocin" ]]; then
+  cd ${bin}/2019_robocin/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2019_titans" ]]; then
+  cd ${bin}/2019_titans/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2019_yushan" ]]; then
+  cd ${bin}/2019_yushan/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2021_alice" ]]; then
+  cd ${bin}/2021_alice/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2021_aras" ]]; then
+  cd ${bin}/2021_aras/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2021_austras2d" ]]; then
+  cd ${bin}/2021_austras2d/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "test" ]]; then
+  cd ../test/src && ./auto.sh -h $HOST -p $PORT -P $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2021_cyrus" ]]; then
+  cd ${bin}/2021_cyrus/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2021_cyrus_r4" ]]; then
+  cd ${bin}/2021_cyrus_r4/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2021_cyrus_r3" ]]; then
+  cd ${bin}/2021_cyrus_r3/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2021_cyrus_r2" ]]; then
+  cd ${bin}/2021_cyrus_r2/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2021_fra-united" ]]; then
+  cd ${bin}/2021_fra-united/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2021_hades2d" ]]; then
+  cd ${bin}/2021_hades2d/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2021_helios" ]]; then
+  cd /home/arad/hel2021 && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2021_hfutengine" ]]; then
+  cd ${bin}/2021_hfutengine/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2021_itandroids" ]]; then
+  cd ${bin}/2021_itandroids/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2021_jyo_sen" ]]; then
+  cd ${bin}/2021_jyo_sen/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2021_mt" ]]; then
+  cd ${bin}/2021_mt/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2021_oxsy" ]]; then
+  cd ${bin}/2021_oxsy/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2021_persepolis" ]]; then
+  cd ${bin}/2021_persepolis/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2021_robocin" ]]; then
+  cd ${bin}/2021_robocin/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2021_thunderleague" ]]; then
+  cd ${bin}/2021_thunderleague/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "2021_yushan" ]]; then
+  cd ${bin}/2021_yushan/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
 fi
+
 sleep 5

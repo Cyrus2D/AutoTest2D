@@ -14,6 +14,7 @@ DEFAULT_PORT= #default port connecting to server
 TEST_NAME="last"
 BUSY_PORT=0
 COPY_BINARY=0
+SHOW_RESULT=0
 BINARY_ADDRESS=""
 
 printHelp() {
@@ -66,6 +67,10 @@ while [[ $# -gt 0 ]]; do
     printHelp
     exit 0
     ;;
+  -R | --result)
+    SHOW_RESULT=1
+    shift 1
+    ;;
   *) # unknown option
     echo "$1" is not valid
     printHelp
@@ -94,15 +99,15 @@ if [[ $TEST_NAME == *"_"* ]]; then
   printHelp
   exit 1
 fi
-
-echo "\$THREAD = $THREAD"
-echo "\$ROUNDS = $ROUNDS"
-echo "\$RANDOM_SEED = $RANDOM_SEED"
-echo "\$DEFAULT_PORT = $DEFAULT_PORT"
-echo "\$LEFT_TEAM = $LEFT_TEAM"
-echo "\$RIGHT_TEAM = $RIGHT_TEAM"
-echo "\$TEST_NAME = $TEST_NAME"
-
+if [ $SHOW_RESULT -eq 0 ]; then
+  echo "\$THREAD = $THREAD"
+  echo "\$ROUNDS = $ROUNDS"
+  echo "\$RANDOM_SEED = $RANDOM_SEED"
+  echo "\$DEFAULT_PORT = $DEFAULT_PORT"
+  echo "\$LEFT_TEAM = $LEFT_TEAM"
+  echo "\$RIGHT_TEAM = $RIGHT_TEAM"
+  echo "\$TEST_NAME = $TEST_NAME"
+fi
 BASE_DIR="out/${TEST_NAME}"
 RESULT_DIR="${BASE_DIR}/result.d"
 LOG_DIR="${BASE_DIR}/log.d"
@@ -242,15 +247,15 @@ check_port() {
 autotest() {
   export LANG="POSIX"
   check_port
-  if [ $BUSY_PORT -ne 0 ]; then
+  if [ $BUSY_PORT -ne 0 ] && [ $SHOW_RESULT -eq 0 ] ; then
     echo "Some ports are busy"
     exit
   fi
-  if [ "$(server_count)" -gt 0 ]; then
+  if [ "$(server_count)" -gt 0 ] && [ $SHOW_RESULT -eq 0 ] ; then
     echo "Warning: other server running"
     #exit
   fi
-  if [ -d "out/$TEST_NAME" ]; then
+  if [ -d "out/$TEST_NAME" ] && [ $SHOW_RESULT -eq 0 ] ; then
     echo "Warning: previous test result left, backuped"
     mv "out/${TEST_NAME}" "out/${TEST_NAME}_$(date +"%F_%H%M")"
   fi
@@ -272,6 +277,20 @@ autotest() {
     i=$((i + 1))
     sleep 1
   done
+  if [ $SHOW_RESULT -ne 0 ]; then
+    while true
+    do
+	    running=$(pgrep rcssserver)
+	    if [ -z "$running" ]; then
+		    ./result.sh -n "$TEST_NAME" -R
+		    break
+	    else
+		    sleep 10
+	    fi
+
+    done
+  fi
   return 0
 }
+
 autotest

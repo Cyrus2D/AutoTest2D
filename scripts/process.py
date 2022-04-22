@@ -114,7 +114,7 @@ def html(line):
 
 class GameData:
     class Result:
-        def __init__(self, index, filename, left_score, right_score, left_points, right_points, left_shoot_count, valid, miss):
+        def __init__(self, index, filename, left_score, right_score, left_points, right_points, left_shoot_count, valid, miss,disconnects):
             self.index = index
             self.filename = filename
             self.left_score = left_score
@@ -124,6 +124,7 @@ class GameData:
             self.left_shoot_count = left_shoot_count
             self.valid = valid
             self.miss = miss
+            self.disconnects=disconnects
 
     def __init__(self, verbose, curve, map):
         self.count = 0
@@ -184,7 +185,7 @@ class GameData:
     def add_newline(self):
         self.context.add_line(Context.Line(""))
 
-    def update(self, left_score, right_score, left_shoot_count, valid, miss, filename):
+    def update(self, left_score, right_score, left_shoot_count, valid, miss, filename,disconnects):
         self.count += 1
 
         self.left_score_distri[left_score] = self.left_score_distri.get(left_score, 0) + 1
@@ -214,7 +215,7 @@ class GameData:
             right_points += 1
             self.draw_count += 1
 
-        self.result_list.append(self.Result(self.count, filename, left_score, right_score, left_points, right_points, left_shoot_count, valid, miss))
+        self.result_list.append(self.Result(self.count, filename, left_score, right_score, left_points, right_points, left_shoot_count, valid, miss,disconnects))
 
         self.left_goals += left_score
         self.right_goals += right_score
@@ -358,8 +359,11 @@ class GameData:
             self.add_line("Game Details:")
             self.add_newline()
             for result in self.result_list:
-                line = Context.Line("%3d%6d:%d%6d:%d      [%s]" % (result.index, result.left_score, result.right_score, result.left_points, result.right_points, result.filename))
+
                 if result.valid:
+                    line = Context.Line("%3d%6d:%d%6d:%d      [%s]" % (
+                    result.index, result.left_score, result.right_score, result.left_points, result.right_points,
+                    result.filename))
                     diff = result.left_score - result.right_score
                     if diff <= min_diff:
                         min_diff = diff
@@ -370,6 +374,9 @@ class GameData:
                     elif diff <= left_attention or diff >= right_attention:
                         line.color = Color.GREEN
                 else:
+                    line = Context.Line("%3d%6d:%d%6d:%d      [%s] $$$$ %s" % (
+                    result.index, result.left_score, result.right_score, result.left_points, result.right_points,
+                    result.filename, result.disconnects))
                     line.color = Color.RED
 
                 if self.verbose or line.color != Color.NONE:
@@ -384,11 +391,11 @@ class GameData:
 
     def generate_context(self, lines):
         self.title = lines.pop(0)
-
         for line in lines:
             parts = line.split()
-            parts = map(int, parts[:-1]) + parts[-1:]
+            parts = map(int, parts[:5]) + parts[-1:]+[" ".join(parts[5:-1])]
             self.update(*parts)
+
 
         if not self.curve and not self.map:
             self.compute()
