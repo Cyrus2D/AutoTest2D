@@ -203,27 +203,29 @@ generate_html() {
 
 check_port() {
   local i=0
+  port_list=""
   while [ $i -lt "$THREAD" ]; do
     local PORT
     ADDPort=$((i * 10))
     PORT=$((DEFAULT_PORT + ADDPort))
     local COACH_PORT=$((PORT + 1))
     local OLCOACH_PORT=$((PORT + 2))
-    PORT_USED=$(lsof -i:$PORT)
-    COACH_PORT_USED=$(lsof -i:$COACH_PORT)
-    OLCOACH_PORT_USED=$(lsof -i:$OLCOACH_PORT)
-    if [[ "${#PORT_USED}" -gt 0 ]]; then
-      BUSY_PORT=$PORT
-      echo "$PORT_USED"
-    fi
-    if [[ "${#COACH_PORT_USED}" -gt 0 ]]; then
-      BUSY_PORT=$COACH_PORT
-      echo "$COACH_PORT_USED"
-    fi
-    if [[ "${#OLCOACH_PORT_USED}" -gt 0 ]]; then
-      BUSY_PORT=$OLCOACH_PORT
-      echo "$OLCOACH_PORT_USED"
-    fi
+    port_list="${port_list}${PORT},${COACH_PORT},${OLCOACH_PORT},"
+    i=$((i + 1))
+  done
+  PORT_USED=$(lsof -i:${port_list})
+  if [[ "${#PORT_USED}" -gt 0 ]]; then
+    BUSY_PORT=$DEFAULT_PORT
+    echo "$PORT_USED"
+  fi
+
+  i=0
+  while [ $i -lt "$THREAD" ]; do
+    local PORT
+    ADDPort=$((i * 10))
+    PORT=$((DEFAULT_PORT + ADDPort))
+    local COACH_PORT=$((PORT + 1))
+    local OLCOACH_PORT=$((PORT + 2))
     for file in out*/PORT*; do
       [[ -e "$file" ]] || break
       if grep -q $PORT "$file"; then
@@ -240,7 +242,6 @@ check_port() {
       fi
     done
     i=$((i + 1))
-    sleep 1
   done
 }
 
@@ -249,6 +250,7 @@ autotest() {
   check_port
   if [ $BUSY_PORT -ne 0 ] && [ $SHOW_RESULT -eq 0 ] ; then
     echo "Some ports are busy"
+    echo $PORT_USED
     exit
   fi
   if [ "$(server_count)" -gt 0 ] && [ $SHOW_RESULT -eq 0 ] ; then
