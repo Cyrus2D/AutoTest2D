@@ -10,7 +10,7 @@ FULLSTATE_L="0"      #full state mode for left
 FULLSTATE_R="0"      #full state mode for right
 LEFT_TEAM=
 RIGHT_TEAM=
-DEFAULT_PORT= #default port connecting to server
+START_PORT= #default port connecting to server
 TEST_NAME="last"
 BUSY_PORT=0
 COPY_BINARY=0
@@ -19,11 +19,13 @@ BINARY_ADDRESS=""
 
 printHelp() {
   echo "Without Session Name: the script saves in ./out/last"
-  echo "./test -l LEFT_TEAM -r RIGHT_TEAM -p DEFAULT_PORT [-t THREAD] [-ro ROUNDS]"
+  echo "./test -l LEFT_TEAM -r RIGHT_TEAMS -p START_PORT [-t THREAD] [-ro ROUNDS] [-n TEST_NAME]"
   echo ""
   echo "By using Test Name: the script saves in ./out/TEST_NAME/"
   echo "TEST name can not contain _ last all"
-  echo ./test -l LEFT_TEAM -r RIGHT_TEAM -p DEFAULT_PORT [-t THREAD] [-ro ROUNDS] [-n TEST_NAME]
+  echo "RIGHT_TEAMS includes some , seperated teams: yushan,helios,agent"
+  echo "THREAD number must be divisible by the number of right teams"
+  echo ./test -l LEFT_TEAM -r RIGHT_TEAMS -p START_PORT [-t THREAD] [-ro ROUNDS] [-n TEST_NAME]
   echo ""
 }
 
@@ -39,7 +41,7 @@ while [[ $# -gt 0 ]]; do
     shift 2
     ;;
   -p | --port)
-    DEFAULT_PORT="$2"
+    START_PORT="$2"
     shift 2
     ;;
   -l | --left)
@@ -80,7 +82,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 success=1
-[ -n "$DEFAULT_PORT" ] || success=0
+[ -n "$START_PORT" ] || success=0
 [ -n "$LEFT_TEAM" ] || success=0
 [ -n "$RIGHT_TEAM" ] || success=0
 if ((!success)); then
@@ -99,11 +101,22 @@ if [[ $TEST_NAME == *"_"* ]]; then
   printHelp
   exit 1
 fi
+RIGHT_TEAM_LIST=()
+RIGHT_TEAM_NUMBER=0
+for i in $(echo $RIGHT_TEAM | sed "s/,/ /g")
+do
+    RIGHT_TEAM_LIST+=("$i")
+    RIGHT_TEAM_NUMBER=$((RIGHT_TEAM_NUMBER+1))
+done
+if [[ $(($THREAD%$RIGHT_TEAM_NUMBER)) != 0 ]]; then
+  printHelp
+  exit 1
+fi
 if [ $SHOW_RESULT -eq 0 ]; then
   echo "\$THREAD = $THREAD"
   echo "\$ROUNDS = $ROUNDS"
   echo "\$RANDOM_SEED = $RANDOM_SEED"
-  echo "\$DEFAULT_PORT = $DEFAULT_PORT"
+  echo "\$START_PORT = $START_PORT"
   echo "\$LEFT_TEAM = $LEFT_TEAM"
   echo "\$RIGHT_TEAM = $RIGHT_TEAM"
   echo "\$TEST_NAME = $TEST_NAME"
@@ -144,6 +157,7 @@ match() {
   local OPTIONS=""
   local COACH_PORT=$((PORT + 1))
   local OLCOACH_PORT=$((PORT + 2))
+  local RIGHT_TEAM=$3
   echo "$PORT" >>${BASE_DIR}/PORT_${TH_ID}
   echo "$COACH_PORT" >>${BASE_DIR}/PORT_${TH_ID}
   echo "$OLCOACH_PORT" >>${BASE_DIR}/PORT_${TH_ID}
@@ -207,7 +221,7 @@ check_port() {
   while [ $i -lt "$THREAD" ]; do
     local PORT
     ADDPort=$((i * 10))
-    PORT=$((DEFAULT_PORT + ADDPort))
+    PORT=$((START_PORT + ADDPort))
     local COACH_PORT=$((PORT + 1))
     local OLCOACH_PORT=$((PORT + 2))
     port_list="${port_list}${PORT},${COACH_PORT},${OLCOACH_PORT},"
@@ -215,7 +229,7 @@ check_port() {
   done
   PORT_USED=$(lsof -i:${port_list})
   if [[ "${#PORT_USED}" -gt 0 ]]; then
-    BUSY_PORT=$DEFAULT_PORT
+    BUSY_PORT=$START_PORT
     echo "$PORT_USED"
   fi
 
@@ -223,7 +237,7 @@ check_port() {
   while [ $i -lt "$THREAD" ]; do
     local PORT
     ADDPort=$((i * 10))
-    PORT=$((DEFAULT_PORT + ADDPort))
+    PORT=$((START_PORT + ADDPort))
     local COACH_PORT=$((PORT + 1))
     local OLCOACH_PORT=$((PORT + 2))
     for file in out*/PORT*; do
@@ -270,14 +284,18 @@ autotest() {
     prepare_binary
   fi
   local i=0
-  while [ $i -lt "$THREAD" ]; do
-    local PORT
-    ADDPort=$((i * 10))
-    PORT=$((DEFAULT_PORT + ADDPort))
-    match $PORT $i &
-    echo $! >>${BASE_DIR}/PID_$i
+  local p=0
+  while [ $i -lt $(($THREAD/$RIGHT_TEAM_NUMBER)) ]; do
+    for RIGHT_TEAM_ in ${RIGHT_TEAM_LIST[@]}; do
+      local PORT
+      ADDPort=$((p * 10))
+      PORT=$((START_PORT + ADDPort))
+      match $PORT $p $RIGHT_TEAM_ &
+      echo $! >>${BASE_DIR}/PID_$p
+      p=$((p + 1))
+      sleep 1
+    done
     i=$((i + 1))
-    sleep 1
   done
   if [ $SHOW_RESULT -ne 0 ]; then
     while true
@@ -289,7 +307,6 @@ autotest() {
 	    else
 		    sleep 10
 	    fi
-
     done
   fi
   return 0
