@@ -8,7 +8,7 @@ RESULT=$5
 bin=/data1/nader/workspace/robo/allgames/bins
 echo "*****STARTING $HOST $PORT $OLCOACH_PORT $OLC$TEAM $RESULT"
 if [[ $# == 6 ]]; then
-  cd $6 && ./auto.sh -h $HOST -p $PORT -P $OLCOACH_PORT &>"$RESULT"
+  cd $6 && ./auto.sh -p $PORT -P $OLCOACH_PORT &>"$RESULT"
 elif [[ $TEAM == "2016_csu_yunlu" ]]; then
   cd ${bin}/2016_csu_yunlu/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
 elif [[ $TEAM == "2016_cyrus" ]]; then
@@ -169,6 +169,7 @@ elif [[ $TEAM == "2021_thunderleague" ]]; then
   cd ${bin}/2021_thunderleague/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
 elif [[ $TEAM == "2021_yushan" ]]; then
   cd ${bin}/2021_yushan/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+else
+  echo "${TEAM} is not found" >>"$RESULT"
 fi
-
 sleep 5
