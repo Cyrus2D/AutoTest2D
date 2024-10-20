@@ -69,7 +69,31 @@ while [[ $# -gt 0 ]]; do
     ;;
   esac
 done
+
 DIR="out/${TEST_NAME}"
+if [ -d "$DIR" ]; then
+    echo "Directory exists: $DIR"
+    # You can add commands here to execute if the directory exists
+else
+    echo "Directory does not exist: $DIR"
+    matching_dirs=$(find "out" -maxdepth 1 -type d -name "${TEST_NAME}*")
+    if [ -z "$matching_dirs" ]; then
+        echo "No directories found starting with '$TEST_NAME' in out/."
+        exit 1
+    fi
+    dir_count=$(echo "$matching_dirs" | grep -c /)
+    if [ $dir_count -gt 1 ]; then
+        echo "Error: Multiple directories found starting with '$TEST_NAME':"
+        echo "$matching_dirs"
+        exit 1
+    fi
+    matching_dirs=$(find "out" -maxdepth 1 -type d -name "${TEST_NAME}*" -exec basename {} \;)
+    TEST_NAME=$(echo "$matching_dirs" | head -n 1)
+    echo "Using directory: $TEST_NAME"
+    DIR="out/${TEST_NAME}"
+fi
+
+
 RESULT_DIR="${DIR}/result.d"
 
 cd $RESULT_DIR 2>/dev/null || exit
