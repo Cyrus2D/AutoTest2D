@@ -1,14 +1,42 @@
 #!/bin/bash
-#$HOST $PORT $OLCOACH_PORT $RIGHT_TEAM $LEFT_RESULT
-HOST=$1
-PORT=$2
-OLCOACH_PORT=$3
-TEAM=$4
-RESULT=$5
+#-h $HOST -p $PORT -P $OLCOACH_PORT -t $TEAM -r $RESULT -b $BIN --R $RPC
 bin=/data1/nader/workspace/robo/allgames/bins
-echo "*****STARTING $HOST $PORT $OLCOACH_PORT $OLC$TEAM $RESULT"
-if [[ $# == 6 ]]; then
-  cd $6 && ./auto.sh -p $PORT -P $OLCOACH_PORT &>"$RESULT"
+
+HOST="127.0.0.1"
+PORT=6000
+OLCOACH_PORT=6002
+TEAM="base"
+RESULT="result.txt"
+RPC_PORT=50051
+RPC_TYPE="grpc"
+BIN=""
+
+while getopts "h:p:P:t:r:b:R:T:" opt; do
+  case $opt in
+  h) HOST=$OPTARG ;;
+  p) PORT=$OPTARG ;;
+  P) OLCOACH_PORT=$OPTARG ;;
+  t) TEAM=$OPTARG ;;
+  r) RESULT=$OPTARG ;;
+  b) BIN=$OPTARG ;;
+  R) RPC_PORT=$OPTARG ;;
+  T) RPC_TYPE=$OPTARG ;;
+  \?) echo "Invalid option -$OPTARG" ;;
+  esac
+done
+
+echo "HOST=$HOST PORT=$PORT OLCOACH_PORT=$OLCOACH_PORT TEAM=$TEAM RESULT=$RESULT BIN=$BIN RPC_PORT=$RPC_PORT RPC_TYPE=$RPC_TYPE"
+
+if [[ -n $BIN ]]; then
+  cd $BIN && ./auto.sh -p $PORT -P $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "base" ]]; then
+  cd /home/nader/workspace/helios-base/build/bin && ./start.sh -p $PORT -P $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "cls" ]]; then
+  cd /home/nader/workspace/clsf/sample-playmaker-server-python-grpc/scripts/proxy && ./start.sh -p $PORT -P $OLCOACH_PORT --rpc-type grpc --rpc-port $RPC_PORT --rpc-type $RPC_TYPE&>"$RESULT"
+elif [[ $TEAM == "yush24" ]]; then
+  cd /home/nader/workspace/bin/YuShan2024 && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "yush23" ]]; then
+  cd /home/nader/workspace/bin/YuShan2023 && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
 elif [[ $TEAM == "2016_csu_yunlu" ]]; then
   cd ${bin}/2016_csu_yunlu/ && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
 elif [[ $TEAM == "2016_cyrus" ]]; then

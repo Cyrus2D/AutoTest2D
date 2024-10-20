@@ -2,7 +2,7 @@
 
 THREAD=5             #number of simultaneously running servers
 ROUNDS=20            #number of games for each server
-GAME_LOGGING="true"  #record RCG logs
+GAME_LOGGING="false"  #record RCG logs
 TEXT_LOGGING="false" #record RCL logs
 RANDOM_SEED="-1"     #random seed, -1 means random seeding
 SYNCH_MODE="1"       #synch mode
@@ -13,9 +13,13 @@ RIGHT_TEAM=
 START_PORT= #default port connecting to server
 TEST_NAME="last"
 BUSY_PORT=0
-COPY_BINARY=0
 SHOW_RESULT=0
-BINARY_ADDRESS=""
+LEFT_BINARY_ADDRESS=""
+RIGHT_BINARY_ADDRESS=""
+LEFT_RPC_PORT=0
+LEFT_RPC_TYPE="grpc"
+RIGHT_RPC_PORT=0
+RIGHT_RPC_TYPE="grpc"
 
 printHelp() {
   echo "Without Session Name: the script saves in ./out/last"
@@ -56,9 +60,16 @@ while [[ $# -gt 0 ]]; do
     TEST_NAME="$2"
     shift 2
     ;;
-  -cb)
-    COPY_BINARY=1
-    BINARY_ADDRESS="$2"
+  -lcb)
+    LEFT_BINARY_ADDRESS="$2"
+    if [ "$2" = "" ]; then
+      printHelp
+      exit 1
+    fi
+    shift 2
+    ;;
+  -rcb)
+    RIGHT_BINARY_ADDRESS="$2"
     if [ "$2" = "" ]; then
       printHelp
       exit 1
@@ -73,6 +84,22 @@ while [[ $# -gt 0 ]]; do
     SHOW_RESULT=1
     shift 1
     ;;
+  --l-rpc-port)
+    LEFT_RPC_PORT="$2"
+    shift 2
+    ;;
+  --l-rpc-type)
+    LEFT_RPC_TYPE="$2"
+    shift 2
+    ;;
+  --r-rpc-port)
+    RIGHT_RPC_PORT="$2"
+    shift 2
+    ;;
+  --r-rpc-type)
+    RIGHT_RPC_TYPE="$2"
+    shift 2
+    ;;
   *) # unknown option
     echo "$1" is not valid
     printHelp
@@ -86,18 +113,22 @@ success=1
 [ -n "$LEFT_TEAM" ] || success=0
 [ -n "$RIGHT_TEAM" ] || success=0
 if ((!success)); then
+  echo "Missing required arguments"
   printHelp
   exit 1
 fi
 if [[ $TEST_NAME == "all" ]]; then
+  echo "TEST_NAME can not be all"
   printHelp
   exit 1
 fi
 if [[ $TEST_NAME == "last" ]]; then
+  echo "TEST_NAME can not be last"
   printHelp
   exit 1
 fi
 if [[ $TEST_NAME == *"_"* ]]; then
+  echo "TEST_NAME can not contain _"
   printHelp
   exit 1
 fi
@@ -124,7 +155,8 @@ fi
 BASE_DIR="out/${TEST_NAME}"
 RESULT_DIR="${BASE_DIR}/result.d"
 LOG_DIR="${BASE_DIR}/log.d"
-NEW_BIN_DIR="${BASE_DIR}/bin"
+LEFT_NEW_BIN_DIR=""
+RIGHT_NEW_BIN_DIR=""
 TOTAL_ROUNDS_FILE="$RESULT_DIR/total_rounds"
 TIME_STAMP_FILE="$RESULT_DIR/time_stamp"
 HTML="$RESULT_DIR/index.html"
@@ -141,12 +173,18 @@ server_count() {
 }
 
 prepare_binary() {
-  if [ ! -f $BINARY_ADDRESS/auto.sh ]; then
-    echo "There is not auto.sh file in $BINARY_ADDRESS"
+  local BINARY_ADDRESS="$1"
+  local NEW_BIN_DIR="$2"
+
+  echo "Copying binary from $BINARY_ADDRESS to $NEW_BIN_DIR"
+  
+  if [ ! -f "$BINARY_ADDRESS/auto.sh" ]; then
+    echo "There is no auto.sh file in $BINARY_ADDRESS"
     exit 1
   fi
-  mkdir $NEW_BIN_DIR
-  cp -r $BINARY_ADDRESS/* $NEW_BIN_DIR
+  
+  mkdir -p "$NEW_BIN_DIR"
+  cp -r "$BINARY_ADDRESS"/* "$NEW_BIN_DIR"
   echo "Binary has been copied from $BINARY_ADDRESS to $NEW_BIN_DIR"
 }
 
@@ -186,13 +224,28 @@ match() {
     local RIGHT_RESULT="${PWD}/${RESULT_DIR}/${TIME}_R"
     if [ ! -f "$RESULT" ]; then
       local FULL_OPTIONS=""
-      FULL_OPTIONS="$OPTIONS -server::team_l_start=\"./start_team $HOST $PORT $OLCOACH_PORT $LEFT_TEAM $LEFT_RESULT\""
-      if [ $COPY_BINARY = 1 ]; then
-        FULL_OPTIONS="$OPTIONS -server::team_l_start=\"./start_team $HOST $PORT $OLCOACH_PORT $LEFT_TEAM $LEFT_RESULT $NEW_BIN_DIR\""
+      LEFT_TEAM_OPTION="-server::team_l_start=\"./start_team -h $HOST -p $PORT -P $OLCOACH_PORT -t $LEFT_TEAM -r $LEFT_RESULT"
+      if [ "$LEFT_NEW_BIN_DIR" != "" ]; then
+        LEFT_TEAM_OPTION="$LEFT_TEAM_OPTION -b $LEFT_NEW_BIN_DIR"
       fi
-      FULL_OPTIONS="$FULL_OPTIONS -server::team_r_start=\"./start_team $HOST $PORT $OLCOACH_PORT $RIGHT_TEAM $RIGHT_RESULT\""
+      if [ "$LEFT_RPC_PORT" != "0" ]; then
+        LEFT_TEAM_OPTION="$LEFT_TEAM_OPTION -P $LEFT_RPC_PORT -T $LEFT_RPC_TYPE"
+      fi
+      LEFT_TEAM_OPTION="$LEFT_TEAM_OPTION\""
+
+      RIGHT_TEAM_OPTION="-server::team_r_start=\"./start_team -h $HOST -p $PORT -P $OLCOACH_PORT -t $RIGHT_TEAM -r $RIGHT_RESULT"
+      if [ "$RIGHT_NEW_BIN_DIR" != "" ]; then
+        RIGHT_TEAM_OPTION="$RIGHT_TEAM_OPTION -b $RIGHT_NEW_BIN_DIR"
+      fi
+      if [ "$RIGHT_RPC_PORT" != "0" ]; then
+        RIGHT_TEAM_OPTION="$RIGHT_TEAM_OPTION -P $RIGHT_RPC_PORT -T $RIGHT_RPC_TYPE"
+      fi
+      RIGHT_TEAM_OPTION="$RIGHT_TEAM_OPTION\""
+
+      FULL_OPTIONS="$OPTIONS $LEFT_TEAM_OPTION $RIGHT_TEAM_OPTION"
       FULL_OPTIONS="$FULL_OPTIONS -server::game_log_dir=\"./$LOG_DIR/\" -server::text_log_dir=\"./$LOG_DIR/\""
       FULL_OPTIONS="$FULL_OPTIONS -server::game_log_fixed_name=\"$TIME\" -server::text_log_fixed_name=\"$TIME\""
+
       run_server $FULL_OPTIONS &>$RESULT
     fi
     sleep 1
@@ -280,8 +333,15 @@ autotest() {
   TOTAL_ROUNDS=$((THREAD * ROUNDS))$
   echo "$TOTAL_ROUNDS" >$TOTAL_ROUNDS_FILE
   date >$TIME_STAMP_FILE
-  if [ $COPY_BINARY = 1 ]; then
-    prepare_binary
+  if [ "$LEFT_BINARY_ADDRESS" != "" ]; then
+    echo "Copying left team binary"
+    LEFT_NEW_BIN_DIR="${BASE_DIR}/bin/${LEFT_TEAM}"
+    prepare_binary "$LEFT_BINARY_ADDRESS" "$LEFT_NEW_BIN_DIR"
+  fi
+  if [ "$RIGHT_BINARY_ADDRESS" != "" ]; then
+    echo "Copying right team binary"
+    RIGHT_NEW_BIN_DIR="${BASE_DIR}/bin/${RIGHT_TEAM}"
+    prepare_binary "$RIGHT_BINARY_ADDRESS" "$RIGHT_NEW_BIN_DIR"
   fi
   local i=0
   local p=0
