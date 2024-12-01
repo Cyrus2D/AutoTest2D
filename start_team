@@ -29,6 +29,14 @@ echo "HOST=$HOST PORT=$PORT OLCOACH_PORT=$OLCOACH_PORT TEAM=$TEAM RESULT=$RESULT
 
 if [[ -n $BIN ]]; then
   cd $BIN && ./auto.sh -p $PORT -P $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "helios_base" ]]; then
+  cd ./binaries/helios_base && ./start.sh -p $PORT -P $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "cyrus2024" ]]; then
+  cd ./binaries/cyrus2024 && ./start.sh -p $PORT -P $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "helios2024" ]]; then
+  cd ./binaries/helios2024 && ./startAll.sh $PORT $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "yushan2024" ]]; then
+  cd ./binaries/yushan2024 && ./start.sh -p $PORT &>"$RESULT"
 elif [[ $TEAM == "base" ]]; then
   cd /home/nader/workspace/helios-base/build/bin && ./start.sh -p $PORT -P $OLCOACH_PORT &>"$RESULT"
 elif [[ $TEAM == "old" ]]; then
