@@ -229,7 +229,7 @@ match() {
         LEFT_TEAM_OPTION="$LEFT_TEAM_OPTION -b $LEFT_NEW_BIN_DIR"
       fi
       if [ "$LEFT_RPC_PORT" != "0" ]; then
-        LEFT_TEAM_OPTION="$LEFT_TEAM_OPTION -P $LEFT_RPC_PORT -T $LEFT_RPC_TYPE"
+        LEFT_TEAM_OPTION="$LEFT_TEAM_OPTION -R $LEFT_RPC_PORT -T $LEFT_RPC_TYPE"
       fi
       LEFT_TEAM_OPTION="$LEFT_TEAM_OPTION\""
 
@@ -238,14 +238,13 @@ match() {
         RIGHT_TEAM_OPTION="$RIGHT_TEAM_OPTION -b $RIGHT_NEW_BIN_DIR"
       fi
       if [ "$RIGHT_RPC_PORT" != "0" ]; then
-        RIGHT_TEAM_OPTION="$RIGHT_TEAM_OPTION -P $RIGHT_RPC_PORT -T $RIGHT_RPC_TYPE"
+        RIGHT_TEAM_OPTION="$RIGHT_TEAM_OPTION -R $RIGHT_RPC_PORT -T $RIGHT_RPC_TYPE"
       fi
       RIGHT_TEAM_OPTION="$RIGHT_TEAM_OPTION\""
 
       FULL_OPTIONS="$OPTIONS $LEFT_TEAM_OPTION $RIGHT_TEAM_OPTION"
       FULL_OPTIONS="$FULL_OPTIONS -server::game_log_dir=\"./$LOG_DIR/\" -server::text_log_dir=\"./$LOG_DIR/\""
       FULL_OPTIONS="$FULL_OPTIONS -server::game_log_fixed_name=\"$TIME\" -server::text_log_fixed_name=\"$TIME\""
-
       run_server $FULL_OPTIONS &>$RESULT
     fi
     sleep 1

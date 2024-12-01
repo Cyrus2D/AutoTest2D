@@ -30,20 +30,40 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# Function to safely kill a process by PID
+safe_kill() {
+  local pid=$1
+  kill $pid
+  sleep 0.5
+  if kill -0 $pid 2>/dev/null; then
+    kill -9 $pid
+  fi
+}
+
+# Function to safely kill all processes by name
+safe_killall() {
+  local name=$1
+  killall $name
+  sleep 0.5
+  if pgrep $name > /dev/null; then
+    killall -9 $name
+  fi
+}
+
 if [[ $TEST_NAME == "all" ]]; then
   exec 2>/dev/null
-  killall -9 test.sh
-  killall -9 rcssserver
-  killall -9 rcssserver.bin
+  safe_killall test.sh
+  safe_killall rcssserver
+  safe_killall rcssserver.bin
   rm -f "/tmp/autotest::temp"
   rm out/*/PORT*
   rm out/*/PID*
 else
   for pid in $(cat out/${TEST_NAME}/PID*); do
-    kill -9 $pid
+    safe_kill $pid
   done
   for port in $(cat out/${TEST_NAME}/PORT*); do
-    kill -9 $(lsof -t -i:${port})
+    safe_kill $(lsof -t -i:${port})
   done
   rm out/"${TEST_NAME}"/PORT*
   rm out/"${TEST_NAME}"/PID*

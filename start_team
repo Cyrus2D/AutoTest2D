@@ -31,8 +31,14 @@ if [[ -n $BIN ]]; then
   cd $BIN && ./auto.sh -p $PORT -P $OLCOACH_PORT &>"$RESULT"
 elif [[ $TEAM == "base" ]]; then
   cd /home/nader/workspace/helios-base/build/bin && ./start.sh -p $PORT -P $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "old" ]]; then
+  cd /home/nader/workspace/old-helios-base/helios-base/build/bin && ./start.sh -p $PORT -P $OLCOACH_PORT &>"$RESULT"
+elif [[ $TEAM == "py2d" ]]; then
+  cd /home/nader/workspace/clsf/py-agent-2d/scripts/binary && ./start.bin --server-port $PORT --use-different-rpc-port --disable-log-file --auto-close-rpc-server &>"$RESULT"
 elif [[ $TEAM == "cls" ]]; then
-  cd /home/nader/workspace/clsf/sample-playmaker-server-python-grpc/scripts/proxy && ./start.sh -p $PORT -P $OLCOACH_PORT --rpc-type grpc --rpc-port $RPC_PORT --rpc-type $RPC_TYPE&>"$RESULT"
+  cd /home/nader/workspace/clsf/py-agent-2d/scripts/proxy && ./start.sh -p $PORT -P $OLCOACH_PORT --rpc-type grpc --rpc-port $RPC_PORT --rpc-type $RPC_TYPE&>"$RESULT"
+elif [[ $TEAM == "cls1" ]]; then
+  cd /home/nader/workspace/clsf/soccer-simulation-proxy/b/cls1/bin && ./start.sh -p $PORT -P $OLCOACH_PORT --rpc-type grpc --rpc-port $RPC_PORT --rpc-type $RPC_TYPE&>"$RESULT"
 elif [[ $TEAM == "yush24" ]]; then
   cd /home/nader/workspace/bin/YuShan2024 && ./startAll $PORT $OLCOACH_PORT &>"$RESULT"
 elif [[ $TEAM == "yush23" ]]; then
